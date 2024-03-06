@@ -8,6 +8,16 @@ spring:
   h2:
     console:
       enabled: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 562452919519-jhdsq61d5fdrgrguvmu8egf68suu02gl.apps.googleusercontent.com
+            client-secret: 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
+            scope:
+              - email
+              - profile
 
 jwt:
   issuer: 32204027@dankook.ac.kr
