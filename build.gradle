@@ -23,7 +23,7 @@ dependencies {
 	implementation 'javax.xml.bind:jaxb-api:2.3.1'
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 
-	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'org.mariadb.jdbc:mariadb-java-client:2.7.4'
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'

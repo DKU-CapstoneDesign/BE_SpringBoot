@@ -1,13 +1,18 @@
 spring:
   jpa:
+    hibernate:
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-    defer-datasource-initialization: true
-  h2:
-    console:
-      enabled: true
+
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://database-capstone.cz44uq4g4xcy.ap-northeast-2.rds.amazonaws.com:3306/capstone
+    username: admin
+    password: adminadmin
+
   security:
     oauth2:
       client:
@@ -21,4 +26,4 @@ spring:
 
 jwt:
   issuer: 32204027@dankook.ac.kr
-  secret_key: study-springboot
+  secret_key: capstone-dku
