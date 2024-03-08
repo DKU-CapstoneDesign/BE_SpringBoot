@@ -27,3 +27,13 @@ spring:
 jwt:
   issuer: 32204027@dankook.ac.kr
   secret_key: capstone-dku
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    groups-order: desc
+    operationsSorter: method
+    disable-swagger-default-url: true
+    display-request-duration: true
+  show-actuator: true
+  default-consumes-media-type: application/json
