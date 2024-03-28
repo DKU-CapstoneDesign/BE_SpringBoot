@@ -9,24 +9,24 @@ spring:
 
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mariadb://database-capstone.cz44uq4g4xcy.ap-northeast-2.rds.amazonaws.com:3306/capstone
-    username: admin
-    password: adminadmin
+    url: jdbc:mariadb://${DB_URL}/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   security:
     oauth2:
       client:
         registration:
           google:
-            client-id: 562452919519-jhdsq61d5fdrgrguvmu8egf68suu02gl.apps.googleusercontent.com
-            client-secret: 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
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
             scope:
               - email
               - profile
 
 jwt:
   issuer: 32204027@dankook.ac.kr
-  secret_key: capstone-dku
+  secret_key: ${JWT_SECRET_KEY}
 
 springdoc:
   swagger-ui:
