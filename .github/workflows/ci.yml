@@ -19,4 +19,12 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
+        env:
+          DB_USER: ${{secrets.DB_USER}}
+          DB_USERNAME: ${{secrets.DB_USERNAME}}
+          DB_PASSWORD: ${{secrets.DB_PASSWORD}}
+          DB_URL: ${{DB_URL}}
+          GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}}
+          GOOGLE_CLIENT_SECRET: ${{secrets.GOOGLE_CLIENT_SECRET}}
+          JWT_SECRET_KEY: ${{secrets.JWT_SECRET_KEY}}
         run: ./gradlew clean build
