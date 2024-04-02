@@ -3,10 +3,10 @@ package project.capstone.controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 @Controller
-public class testController {
+public class UserViewController {
 
 
-    @GetMapping("/login")
+    @GetMapping("/api/login")
     public String login() {
         return "login";
     }

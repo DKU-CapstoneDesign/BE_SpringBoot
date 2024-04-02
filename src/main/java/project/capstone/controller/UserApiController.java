@@ -4,11 +4,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import project.capstone.domain.User;
 import project.capstone.dto.AddUserRequest;
+import project.capstone.service.UserDetailService;
 import project.capstone.service.UserService;
 
 @RequiredArgsConstructor
@@ -16,6 +19,8 @@ import project.capstone.service.UserService;
 public class UserApiController {
 
     private final UserService userService;
+    private final UserDetailService userDetailService;
+
     @PostMapping("/api/signup")
     public String signup(AddUserRequest request) {
         userService.save(request);
@@ -27,4 +32,5 @@ public class UserApiController {
         new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
         return "redirect:/login";
     }
+
 }
