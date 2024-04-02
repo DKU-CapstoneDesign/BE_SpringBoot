@@ -1,8 +1,6 @@
 package project.capstone.dto;
 
 import lombok.*;
-import project.capstone.entity.TextEntity;
-
 import java.time.LocalDateTime;
 
 @Getter
