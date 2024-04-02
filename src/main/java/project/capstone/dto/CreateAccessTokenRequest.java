@@ -1,3 +1,4 @@
+/*
 package project.capstone.dto;
 
 import lombok.Getter;
@@ -7,4 +8,4 @@ import lombok.Setter;
 @Setter
 public class CreateAccessTokenRequest {
     private String refreshToken;
-}
+}*/

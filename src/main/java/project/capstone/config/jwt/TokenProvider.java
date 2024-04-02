@@ -1,3 +1,4 @@
+/*
 package project.capstone.config.jwt;
 
 import io.jsonwebtoken.Claims;
@@ -73,4 +74,4 @@ public class TokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
     }
-}
+}*/

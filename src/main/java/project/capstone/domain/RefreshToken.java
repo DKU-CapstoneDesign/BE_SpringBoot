@@ -1,3 +1,4 @@
+/*
 package project.capstone.domain;
 
 import jakarta.persistence.*;
@@ -32,3 +33,4 @@ public class RefreshToken {
         return this;
     }
 }
+*/
