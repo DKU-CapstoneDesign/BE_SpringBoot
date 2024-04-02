@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>community</title>
+</head>
+<body>
+    <h2>community page</h2>
+
+    내 계정: <span th:text="${session.loginEmail}"></span> <br>
+
+    <button onclick="writeText()">글 작성</button>
+
+
+
+
+    <br> <br>
+    <a href="/app/login">로그아웃</a>
+    <a href="/app/home">홈 화면</a>
+    <a href="/app/guide">가이드라인</a>
+    <a href="/app/chatting">채팅</a>
+    <a href="/app/community">게시판</a>
+    <a href="/app/mypage">내 정보</a>
+
+
+</body>
+<script>
+    function writeText() {
+        location.href = "/app/community/write-text";
+    }
+</script>
+
+</html>
