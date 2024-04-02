@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import project.capstone.domain.User;
 import project.capstone.dto.AddUserRequest;
 import project.capstone.dto.MemberDTO;
+import project.capstone.dto.TextDTO;
+import project.capstone.service.TextService;
 import project.capstone.service.UserService;
 
 @Controller
@@ -16,6 +18,7 @@ import project.capstone.service.UserService;
 public class TestApiController {
     // 생성자 주입
     private final UserService userService;
+    private final TextService textService;
 
     @PostMapping("/app/login")
     public String login(@ModelAttribute AddUserRequest addUserRequestDTO, HttpSession session) {
@@ -51,6 +54,24 @@ public class TestApiController {
     public String logout(HttpSession session) {
         session.invalidate();
         return "login";
+    }
+
+    @GetMapping("/app/community/write-text")
+    public String writeText() {
+        return "write_text";
+    }
+
+    @PostMapping("app/community/write-text")
+    public String saveText(HttpSession session, @ModelAttribute TextDTO textDTO) {
+        String textWriter = (String) session.getAttribute("loginEmail");
+        System.out.println(textWriter);
+        textDTO.setTextWriter(textWriter);
+        System.out.println("session = " + session + ", textDTO = " + textDTO);
+
+        textService.save(textDTO);
+
+
+        return "community";
     }
 
 }

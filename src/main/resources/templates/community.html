@@ -7,7 +7,9 @@
 <body>
     <h2>community page</h2>
 
-    내 계정: <span th:text="${session.loginEmail}"></span>
+    내 계정: <span th:text="${session.loginEmail}"></span> <br>
+
+    <button onclick="writeText()">글 작성</button>
 
 
 
@@ -22,4 +24,10 @@
 
 
 </body>
+<script>
+    function writeText() {
+        location.href = "/app/community/write-text";
+    }
+</script>
+
 </html>
