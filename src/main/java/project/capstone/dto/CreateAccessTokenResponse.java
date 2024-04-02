@@ -1,3 +1,4 @@
+/*
 package project.capstone.dto;
 
 import lombok.AllArgsConstructor;
@@ -8,3 +9,4 @@ import lombok.Getter;
 public class CreateAccessTokenResponse {
     private String accessToken;
 }
+*/

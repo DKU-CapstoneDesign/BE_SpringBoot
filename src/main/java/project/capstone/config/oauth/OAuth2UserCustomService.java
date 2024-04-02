@@ -1,3 +1,4 @@
+/*
 package project.capstone.config.oauth;
 
 import lombok.RequiredArgsConstructor;
@@ -43,3 +44,4 @@ public class OAuth2UserCustomService extends DefaultOAuth2UserService {
         return userRepository.save(user);
     }
 }
+*/

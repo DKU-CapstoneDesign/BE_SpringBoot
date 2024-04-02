@@ -1,3 +1,4 @@
+/*
 package project.capstone.config.oauth;
 
 import jakarta.servlet.http.Cookie;
@@ -37,4 +38,4 @@ public class OAuth2AuthorizationRequestBasedOnCookieRepository implements Author
     public void removeAuthorizationRequestCookies(HttpServletRequest request, HttpServletResponse response) {
         CookieUtil.deleteCookie(request, response, OAUTH2_AUTHORIZATION_REQUEST_COOKIE_NAME);
     }
-}
+}*/

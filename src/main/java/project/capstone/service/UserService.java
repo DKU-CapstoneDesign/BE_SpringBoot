@@ -19,6 +19,7 @@ public class UserService {
         return userRepository.save(User.builder()
                 .email(dto.getEmail())
                 .password(encoder.encode(dto.getPassword()))
+                .country(dto.getCountry())
                 .build()).getId();
     }
 
@@ -28,7 +29,10 @@ public class UserService {
     }
 
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Unexpected user"));
+        return userRepository.findByEmail(email).orElse(null);
+    }
+
+    public User findByNickname(String nickname) {
+        return userRepository.findByNickname(nickname).orElse(null);
     }
 }

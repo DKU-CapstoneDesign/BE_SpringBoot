@@ -1,3 +1,4 @@
+/*
 package project.capstone.config;
 import lombok.RequiredArgsConstructor;
 
@@ -100,3 +101,4 @@ public class WebOAuthSecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+*/

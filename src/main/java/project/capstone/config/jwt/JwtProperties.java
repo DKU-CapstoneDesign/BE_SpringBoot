@@ -1,3 +1,4 @@
+/*
 package project.capstone.config.jwt;
 
 import lombok.Getter;
@@ -15,3 +16,4 @@ public class JwtProperties {
     private String secretKey;
 
 }
+*/

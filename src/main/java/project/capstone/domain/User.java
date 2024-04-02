@@ -31,20 +31,21 @@ public class User implements UserDetails {
     @Column(name = "nickname", unique = true)
     private String nickname;
 
+    @Column(name = "country")
+    private String country;
+
     @Builder
-    public User(String email, String password, String nickname) {
+    public User(String email, String password, String nickname, String country) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
+        this.country = country;
     }
 
     public User update(String nickname) {
         this.nickname = nickname;
-
         return this;
     }
-
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

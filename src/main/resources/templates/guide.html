@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>guide</title>
+</head>
+<body>
+    <h2>guide page</h2>
+
+    내 계정: <span th:text="${session.loginEmail}"></span>
+
+    <h3>1. 대한민국 소개</h3>
+
+    <h3>2. 한국문화와 생활</h3>
+
+    <h3>3. 교통수단</h3>
+
+
+
+
+    <br> <br>
+    <a href="/app/login">로그아웃</a>
+    <a href="/app/home">홈 화면</a>
+    <a href="/app/guide">가이드라인</a>
+    <a href="/app/chatting">채팅</a>
+    <a href="/app/community">게시판</a>
+    <a href="/app/mypage">내 정보</a>
+
+</body>
+</html>
