@@ -13,6 +13,10 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+  data:
+    mongodb:
+      uri: mongodb+srv://jkw:5033@kore.iv5scds.mongodb.net/chatdb?retryWrites=true&w=majority&appName=kore
+
   security:
     oauth2:
       client:

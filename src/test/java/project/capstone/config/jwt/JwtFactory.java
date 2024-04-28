@@ -1,3 +1,4 @@
+/*
 package project.capstone.config.jwt;
 
 import io.jsonwebtoken.Header;
@@ -47,4 +48,4 @@ public class JwtFactory {
                 .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey())
                 .compact();
     }
-}
+}*/

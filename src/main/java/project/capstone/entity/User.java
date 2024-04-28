@@ -1,4 +1,4 @@
-package project.capstone.domain;
+package project.capstone.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -9,7 +9,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -34,12 +36,16 @@ public class User implements UserDetails {
     @Column(name = "country")
     private String country;
 
+    @Column(name = "birth_date")
+    private Date birthDate;
+
     @Builder
-    public User(String email, String password, String nickname, String country) {
+    public User(String email, String password, String nickname, String country, Date birthDate) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;
         this.country = country;
+        this.birthDate = birthDate;
     }
 
     public User update(String nickname) {

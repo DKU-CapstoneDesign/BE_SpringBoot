@@ -2,7 +2,7 @@ package project.capstone.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import project.capstone.domain.User;
+import project.capstone.entity.User;
 
 import java.util.Optional;
 
