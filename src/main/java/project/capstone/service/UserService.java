@@ -1,10 +1,11 @@
 package project.capstone.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import project.capstone.entity.User;
 import project.capstone.dto.AddUserRequest;
+import project.capstone.entity.User;
 import project.capstone.repository.UserRepository;
 
 @RequiredArgsConstructor
@@ -15,12 +16,12 @@ public class UserService {
 
     public Long save(AddUserRequest dto) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-
         return userRepository.save(
                 User
                         .builder()
                         .email(dto.getEmail())
                         .password(encoder.encode(dto.getPassword()))
+                        .nickname(dto.getNickname())
                         .country(dto.getCountry())
                         .birthDate(dto.getBirthDate())
                         .build()

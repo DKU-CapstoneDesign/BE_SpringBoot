@@ -1,3 +1,4 @@
+/*
 package project.capstone.controller;
 
 import org.springframework.stereotype.Controller;
@@ -40,3 +41,4 @@ public class HomeController {
         return "mypage";
     }
 }
+*/

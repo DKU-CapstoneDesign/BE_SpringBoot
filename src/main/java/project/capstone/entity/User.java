@@ -9,7 +9,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
@@ -37,10 +36,10 @@ public class User implements UserDetails {
     private String country;
 
     @Column(name = "birth_date")
-    private Date birthDate;
+    private String birthDate;
 
     @Builder
-    public User(String email, String password, String nickname, String country, Date birthDate) {
+    public User(String email, String password, String nickname, String country, String birthDate) {
         this.email = email;
         this.password = password;
         this.nickname = nickname;

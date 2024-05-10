@@ -3,62 +3,54 @@ package project.capstone.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import project.capstone.dto.*;
 import project.capstone.entity.User;
-import project.capstone.dto.AddUserRequest;
-import project.capstone.dto.CheckUserEmail;
-import project.capstone.dto.CheckUserNickname;
-import project.capstone.dto.Duplication;
-import project.capstone.service.UserDetailService;
 import project.capstone.service.UserService;
 
+@Slf4j
 @RequiredArgsConstructor
-@Controller
+@RestController
 public class UserApiController {
 
     private final UserService userService;
-    private final UserDetailService userDetailService;
+
     @PostMapping("/api/signup")
-    public String signup(AddUserRequest request) {
-        userService.save(request);
-        return "redirect:/login";
+    public Signup signup(AddUserRequest request) {
+        Signup signup = new Signup();
+        signup.setId(userService.save(request));
+        return signup;
     }
 
     @GetMapping("/api/logout")
-    public String logout(HttpServletRequest request, HttpServletResponse response) {
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
         new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
-        return "redirect:/login";
     }
 
-    @ResponseBody
+
     @PostMapping("/api/duplication/email")
     public Duplication checkEmail(@RequestBody CheckUserEmail emailDto){
+        log.debug("emailDto: {}", emailDto.getEmail());
         Duplication duplication = new Duplication();
         User user = userService.findByEmail(emailDto.getEmail());
-        if(user == null){
-            duplication.setDuplication(false);
-        }
-        else{
-            duplication.setDuplication(true);
-        }
+        duplication.setDuplication(user != null);
+        log.debug("duplication: {}", duplication.isDuplication());
         return duplication;
-
     }
 
-    @ResponseBody
     @PostMapping("/api/duplication/nickname")
     public Duplication checkNickname(@RequestBody CheckUserNickname nicknameDto){
+        log.debug("nicknameDto: {}", nicknameDto.getNickname());
         Duplication duplication = new Duplication();
         User user = userService.findByNickname(nicknameDto.getNickname());
-        if(user == null){
-            duplication.setDuplication(false);
-        }
-        else{
-            duplication.setDuplication(true);
-        }
+        duplication.setDuplication(user != null);
+        log.debug("duplication: {}", duplication.isDuplication());
         return duplication;
     }
 }

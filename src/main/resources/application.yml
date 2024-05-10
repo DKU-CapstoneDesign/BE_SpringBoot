@@ -2,7 +2,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -41,3 +41,4 @@ springdoc:
     display-request-duration: true
   show-actuator: true
   default-consumes-media-type: application/json
+
