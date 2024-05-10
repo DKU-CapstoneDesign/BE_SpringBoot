@@ -5,11 +5,12 @@ import lombok.Setter;
 
 import java.util.Date;
 
-@Setter
 @Getter
+@Setter
 public class AddUserRequest {
     private String email;
     private String password;
+    private String nickname;
     private String country;
-    private Date birthDate;
+    private String birthDate;
 }

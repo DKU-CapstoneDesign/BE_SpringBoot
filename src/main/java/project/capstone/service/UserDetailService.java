@@ -1,7 +1,6 @@
 package project.capstone.service;
 
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 import project.capstone.entity.User;
