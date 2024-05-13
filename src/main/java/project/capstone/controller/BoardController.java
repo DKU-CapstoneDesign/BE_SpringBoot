@@ -15,7 +15,7 @@ import java.util.List;
 @RequestMapping("/board")
 public class BoardController {
     private final BoardService boardService; // 생성자 주입으로 의존성을 주입받는다.
-    @GetMapping("/save") //"/board/save" 를 의미
+    @GetMapping("/save")
     public String saveForm() {
         return "save";
     }
@@ -32,7 +32,7 @@ public class BoardController {
         // DB에서 전체 게시글 데이터를 가져와서 list.html에 가져온다.
         List<BoardDTO> boardDTOList = boardService.findAll(); // 여러개를 가져올 경오 list로
         model.addAttribute("boardList", boardDTOList);
-        return "list";
+        return "list"; // 이 코드 작성 후 BoardService 추가해줌.
     }
 
     @GetMapping("/{id}") //board 이하의 id
