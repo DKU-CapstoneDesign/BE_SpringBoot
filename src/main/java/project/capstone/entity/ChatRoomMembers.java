@@ -20,7 +20,6 @@ public class ChatRoomMembers {
     @ManyToOne
     @JoinColumn(name = "room_id", insertable=false, updatable=false)
     private ChatRoom chatRoom;
-    
 }
 
 @Embeddable
@@ -31,5 +30,4 @@ class ChatRoomMembersId implements Serializable {
 
     @Column(name = "room_id")
     private Long roomId;
-
 }

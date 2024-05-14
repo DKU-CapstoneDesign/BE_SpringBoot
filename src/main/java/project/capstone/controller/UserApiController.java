@@ -33,7 +33,6 @@ public class UserApiController {
         new SecurityContextLogoutHandler().logout(request, response, SecurityContextHolder.getContext().getAuthentication());
     }
 
-
     @PostMapping("/api/duplication/email")
     public Duplication checkEmail(@RequestBody CheckUserEmail emailDto){
         log.debug("emailDto: {}", emailDto.getEmail());
