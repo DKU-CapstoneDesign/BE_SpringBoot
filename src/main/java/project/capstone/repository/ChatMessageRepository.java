@@ -19,6 +19,7 @@ public interface ChatMessageRepository extends ReactiveMongoRepository<ChatMessa
     @Query("{ roomNum: ?0 }")
     Flux<ChatMessage> findByRoomNum(String roomNum);
 
-    Mono<ChatMessage> findFirstByRoomNumOrderByCreatedAtDesc(String roomNum);
+    Flux<ChatMessage> findFirstByRoomNumOrderByCreatedAtDesc(String roomNum);
 
+    Mono<Boolean> existsByRoomNumAndReceiverAndReadFalse(String roomNum, String receiver);
 }

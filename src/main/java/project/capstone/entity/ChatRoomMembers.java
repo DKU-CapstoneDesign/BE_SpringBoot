@@ -2,11 +2,14 @@ package project.capstone.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "chat_room_members")
 public class ChatRoomMembers {
 
@@ -20,6 +23,8 @@ public class ChatRoomMembers {
     @ManyToOne
     @JoinColumn(name = "room_id", insertable=false, updatable=false)
     private ChatRoom chatRoom;
+
+    private boolean isRead = false;
 }
 
 @Embeddable

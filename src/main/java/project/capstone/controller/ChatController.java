@@ -1,16 +1,17 @@
 package project.capstone.controller;
 
+import com.mongodb.client.result.UpdateResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.capstone.dto.CreateChatRoomByNickname;
-import project.capstone.dto.FindChatRoomByNickname;
+import project.capstone.dto.Read;
 import project.capstone.entity.ChatMessage;
 import project.capstone.entity.ChatRoom;
 import project.capstone.entity.ChatRoomMembers;
 import project.capstone.entity.User;
-import project.capstone.repository.ChatMessageRepository;
 import project.capstone.service.ChatMessageService;
 import project.capstone.service.ChatRoomMembersService;
 import project.capstone.service.ChatRoomService;
@@ -20,6 +21,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -33,7 +35,6 @@ public class ChatController {
     private final ChatRoomMembersService chatRoomMembersService;
     private final UserService userService;
     private final ChatRoomService chatRoomService;
-    private final ChatMessageRepository chatMessageRepository;
 
     // 대화 기록 가져오기 (송수신자 닉네임 기반)
     @CrossOrigin
@@ -51,14 +52,21 @@ public class ChatController {
                 .subscribeOn(Schedulers.boundedElastic());
     }
 
+    // 메시지 읽음 요청
+    @CrossOrigin
+    @PutMapping("/api/chat/{roomNum}/user/{nickname}")
+    public Mono<UpdateResult> updateIsRead(@PathVariable String roomNum, @PathVariable String nickname){
+        log.info("request: read message");
+
+        return chatMessageService.updateRead(roomNum, nickname);
+    }
+
     // 메시지 보내기
     @CrossOrigin
     @PostMapping("/api/chat")
     public Mono<ChatMessage> setMessage(@RequestBody ChatMessage chatMessage){
-        // 메시지 보낼 때 ChatRoom id를 메시지 roomNum 에 세팅해서 보내기
         return chatMessageService.save(chatMessage);
     }
-
 
     // 채팅방 생성
     @PostMapping("/api/chat/creating")
@@ -112,29 +120,51 @@ public class ChatController {
 
     // 검색 닉네임이 포함된 채팅방 모두 가져오기
     // 채팅방을 찾고, 채팅방의 마지막 메시지를 가져와서 세팅해주기
-    // TODO: lastmessage 세팅하기 (실시간으로 업데이트 되어야 함)
-    // TODO: read 가 false 인 채팅 메시지가 있는 채팅방 리스트 뽑기
-    @PostMapping(value = "/api/chat/nickname", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ChatRoom> getRoomsByNickname(@RequestBody FindChatRoomByNickname findChatRoomByNickname){
+    // lastmessage 세팅하기
+    @GetMapping(value = "/api/chat/list/nickname/{nickname}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ChatRoom> getRoomsByNickname(@PathVariable String nickname){
         // nickname -> User(ID)
-        Long userId = userService.findByNickname(findChatRoomByNickname.getNickname()).getId();
+        Long userId = userService.findByNickname(nickname).getId();
 
         // User(ID) -> ChatRoomMembers
         List<ChatRoomMembers> chatRoomMembers = chatRoomMembersService.findByUserId(userId);
 
+        // 채팅방 별 읽음 상태 정보 세팅하기
         return Flux.fromIterable(chatRoomMembers)
-                .flatMap(member -> {
-                    ChatRoom chatRoom = member.getChatRoom();
-                    // 채팅방 마지막 메시지 가져오기
-                    return chatMessageRepository.findFirstByRoomNumOrderByCreatedAtDesc(chatRoom.getId().toString())
-                            .doOnNext(lastMessage -> {
-                                log.info("lastMessage: {}", lastMessage);
-                                chatRoom.setLastMessage(lastMessage.getMessage());
-                            })
-                            .thenReturn(chatRoom);
-                });
+                //ChatRoomMembers -> ChatRoom
+                .map(chatRoomMember -> {
+                    ChatRoom chatRoom = chatRoomMember.getChatRoom();
+                    // ChatRoom -> ChatMessage
+                    Flux<ChatMessage> lastMessage = chatMessageService.findFirstByRoomNumOrderByCreatedAtDesc(chatRoom.getId().toString());
+                    chatRoom.setLastMessage(lastMessage.blockFirst().getMessage());
+                    chatRoomService.save(chatRoom);
+
+                    return chatRoom;
+                })
+                .subscribeOn(Schedulers.boundedElastic());
     }
 
-    //TODO: @DeleteMapping("/api/chat/deleting/{roomNum}")
+    // 채팅방 별 읽음 여부 가져오기
+    @GetMapping(value = "/api/chat/read/nickname/{nickname}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<List<Read>> getReadsByNickname(@PathVariable String nickname){
+        User user = userService.findByNickname(nickname);
+        List<ChatRoomMembers> chatRoomMembersList = chatRoomMembersService.findAllByUser(user);
+        List<Read> readList = new ArrayList<>();
+
+        for (ChatRoomMembers chatRoomMembers : chatRoomMembersList) {
+            boolean hasUnreadMessage = chatMessageService.existsByRoomNumAndReceiverAndReadFalse(chatRoomMembers.getChatRoom().getId().toString(), nickname).block();
+            chatRoomMembers.setRead(!hasUnreadMessage);
+            chatRoomMembersService.save(chatRoomMembers);
+            readList.add(new Read(chatRoomMembers.getChatRoom().getId().toString(), chatRoomMembers.isRead()));
+        }
+        return ResponseEntity.ok(readList);
+    }
+
+    @CrossOrigin
+    @PutMapping(value = "/api/chat/room/update/{roomNum}")
+    public Mono<UpdateResult> updateUpdatedAt(@PathVariable String roomNum) {
+        log.info("request: update updatedAt");
+        return chatRoomService.updateTime(roomNum);
+    }
 
 }
