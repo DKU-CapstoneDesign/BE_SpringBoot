@@ -8,6 +8,7 @@ import project.capstone.repository.ChatRoomMembersRepository;
 
 import java.util.List;
 
+
 @RequiredArgsConstructor
 @Service
 public class ChatRoomMembersService {
@@ -19,6 +20,14 @@ public class ChatRoomMembersService {
 
     public ChatRoomMembers findByUser(User user) {
         return chatRoomMembersRepository.findByUser(user).orElse(null);
+    }
+
+    public List<ChatRoomMembers> findAllByUser(User user){
+        return chatRoomMembersRepository.findAllByUser(user).orElseThrow();
+    }
+
+    public ChatRoomMembers save(ChatRoomMembers chatRoomMembers){
+        return chatRoomMembersRepository.save(chatRoomMembers);
     }
 
 }

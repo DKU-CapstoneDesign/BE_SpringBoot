@@ -17,6 +17,7 @@ public class ChatRoom {
     private Long id;
     private String lastMessage;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(

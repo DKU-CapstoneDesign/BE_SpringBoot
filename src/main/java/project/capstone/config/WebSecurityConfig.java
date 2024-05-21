@@ -30,7 +30,7 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        // 익명 객체 사용
+
         return http
                 .authorizeRequests()
                 .requestMatchers("/api/**", "/signup", "/login").permitAll()
@@ -44,11 +44,9 @@ public class WebSecurityConfig {
                         (request, response, authentication) -> {
                             response.setContentType("application/json");
 
-                            String email = authentication.getName();
-
                             Login login = new Login();
-                            login.setLoggedIn(email != null);
-                            login.setEmail(email);
+                            login.setLoggedIn(authentication.getName() != null);
+                            login.setAuthentication(authentication);
 
                             Gson gson = new Gson();
                             String jsonData = gson.toJson(login);

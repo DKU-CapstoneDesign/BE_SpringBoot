@@ -5,11 +5,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import project.capstone.dto.*;
 import project.capstone.entity.User;
 import project.capstone.service.UserService;
@@ -51,5 +49,22 @@ public class UserApiController {
         duplication.setDuplication(user != null);
         log.debug("duplication: {}", duplication.isDuplication());
         return duplication;
+    }
+
+    @PostMapping("/api/check/password")
+    public boolean checkCurrentPassword(@RequestBody CheckPassword request){
+        log.debug("request: check current password");
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        return encoder.matches(request.getPassword(), userService.findById(request.getUserId()).getPassword());
+    }
+
+    @PutMapping("/api/modify/password")
+    public User modifyPassword(@RequestBody ModifyPassword request){
+        log.debug("request: modify password");
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        User user = userService.findById(request.getUserId());
+        user.setPassword(encoder.encode(request.getNewPassword()));
+        userService.save(user);
+        return user;
     }
 }

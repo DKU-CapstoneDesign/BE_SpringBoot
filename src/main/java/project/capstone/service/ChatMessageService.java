@@ -1,6 +1,12 @@
 package project.capstone.service;
 
+import com.mongodb.client.result.UpdateResult;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import project.capstone.entity.ChatMessage;
 import project.capstone.entity.ChatRoomMembers;
@@ -12,14 +18,43 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ChatMessageService {
+    private final ReactiveMongoTemplate mongoTemplate;
+
     private final ChatMessageRepository chatMessageRepository;
     private final UserService userService;
     private final ChatRoomMembersService chatRoomMembersService;
 
+    public Flux<ChatMessage> findBySender(String sender, String receiver) {
+        return chatMessageRepository.findBySenderAndReceiver(sender, receiver);
+    }
+
+    public Flux<ChatMessage> findByRoomNum(String roomNum) {
+        return chatMessageRepository.findByRoomNum(roomNum);
+    }
+
+    public Flux<ChatMessage> findFirstByRoomNumOrderByCreatedAtDesc(String roomNum){
+        return chatMessageRepository.findFirstByRoomNumOrderByCreatedAtDesc(roomNum);
+    }
+
+    // 메세지 읽음 표시
+    public Mono<UpdateResult> updateRead(String roomNum, String nickname) {
+        Query query = new Query(Criteria.where("roomNum").is(roomNum)
+                .and("receiver").is(nickname));
+        Update update = Update.update("read", true);
+
+        return mongoTemplate.updateMulti(query, update, ChatMessage.class);
+    }
+
+    public Mono<Boolean> existsByRoomNumAndReceiverAndReadFalse(String roomNum, String nickname) {
+        return chatMessageRepository.existsByRoomNumAndReceiverAndReadFalse(roomNum, nickname);
+    }
+
     public Mono<ChatMessage> save(ChatMessage chatMessage){
+        // 메시지 보낼 때 ChatRoom id를 메시지 roomNum 에 세팅해서 보내기
         chatMessage.setCreatedAt(LocalDateTime.now());
         chatMessage.setRead(false);
 
@@ -41,15 +76,6 @@ public class ChatMessageService {
         }
 
         return chatMessageRepository.save(chatMessage);
-    }
-
-    public Flux<ChatMessage> findBySender(String sender, String receiver) {
-        return chatMessageRepository.findBySenderAndReceiver(sender, receiver);
-    }
-
-
-    public Flux<ChatMessage> findByRoomNum(String roomNum) {
-        return chatMessageRepository.findByRoomNum(roomNum);
     }
 
 }
