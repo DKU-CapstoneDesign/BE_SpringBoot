@@ -2,6 +2,7 @@ package project.capstone.service;
 
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,17 +19,20 @@ import project.capstone.entity.enumSet.ErrorType;
 import project.capstone.entity.enumSet.UserRoleEnum;
 import project.capstone.exception.RestApiException;
 import project.capstone.repository.BoardRepository;
+import project.capstone.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BoardService {
 
     private final BoardRepository boardRepository;
+    private final UserRepository userRepository;
 
     // 게시글 전체 목록 조회
     @Transactional(readOnly = true) // 수정 없이 읽기만
@@ -61,11 +65,16 @@ public class BoardService {
 
     // 게시글 작성
     @Transactional
-    public ApiResponseDto<BoardResponseDto> createPost(BoardRequestsDto requestsDto, User user) {
-
+    public ApiResponseDto<BoardResponseDto> createPost(BoardRequestsDto requestsDto) {
+        log.info("request: create post");
+        User user = userRepository.findById(requestsDto.getUserId()).orElseThrow();
+        Board board = new Board();
+        board.setUser(user);
+        board.setTitle(requestsDto.getTitle());
+        board.setContents(requestsDto.getContents());
         // 작성 글 저장
-        Board board = boardRepository.save(Board.of(requestsDto, user));
-
+        Board returnBoard = boardRepository.save(board);
+        log.info("board: {}", board);
         // BoardResponseDto 로 변환 후 responseEntity body 에 담아 반환
         return ResponseUtils.ok(BoardResponseDto.from(board));
 

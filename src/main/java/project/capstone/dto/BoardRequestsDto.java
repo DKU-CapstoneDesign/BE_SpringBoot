@@ -8,5 +8,5 @@ import lombok.Setter;
 public class BoardRequestsDto {
     private String title;
     private String contents;
-
+    private Long userId;
 }
