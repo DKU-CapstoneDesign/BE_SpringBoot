@@ -1,14 +1,17 @@
 package project.capstone.repository;
 
-import project.capstone.entity.BoardEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import project.capstone.entity.Board;
+import project.capstone.entity.User;
 
-public interface BoardRepository extends JpaRepository<BoardEntity, Long> {
-    // update board_table set board_hits=board_hits+1 where id=?
-    @Modifying
-    @Query(value = "update BoardEntity b set b.boardHits=b.boardHits+1 where b.id=:id")
-    void updateHits(@Param("id") Long id);
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface BoardRepository extends JpaRepository<Board, Long> {
+    List<Board> findAllByOrderByModifiedAtDesc();
+    Optional<Board> findByIdAndUser(Long id, User user);
+
+    void deleteAllByUser(User user);
 }
