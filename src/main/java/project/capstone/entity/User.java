@@ -5,6 +5,7 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import project.capstone.entity.enumSet.UserRoleEnum;
 
 import java.util.Collection;
 import java.util.List;
@@ -35,6 +36,13 @@ public class User implements UserDetails {
     @Column(name = "birth_date")
     private String birthDate;
 
+    @Column(name = "username", nullable = false, length = 20)
+    private String username;
+
+    @Column(name = "role", nullable = false, length = 30)
+    @Enumerated(value = EnumType.STRING)
+    private UserRoleEnum role;
+
     @Builder
     public User(String email, String password, String nickname, String country, String birthDate) {
         this.email = email;
@@ -43,6 +51,7 @@ public class User implements UserDetails {
         this.country = country;
         this.birthDate = birthDate;
     }
+
 
     public User update(String nickname) {
         this.nickname = nickname;
