@@ -1,0 +1,87 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        env:
+          DB_NAME: ${{secrets.DB_NAME}}
+          DB_USERNAME: ${{secrets.DB_USERNAME}}
+          DB_PASSWORD: ${{secrets.DB_PASSWORD}}
+          DB_URL: ${{secrets.DB_URL}}
+          GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}}
+          GOOGLE_CLIENT_SECRET: ${{secrets.GOOGLE_CLIENT_SECRET}}
+          JWT_SECRET_KEY: ${{secrets.JWT_SECRET_KEY}}
+        run: ./gradlew clean build
+
+---
+
+name: cd
+
+on:
+  push:
+    branches:
+      - main
+      
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        
+      - name: Connect deploy key
+        uses: cloudtype-github-actions/connect@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          ghtoken: ${{ secrets.GHP_TOKEN }}
+          
+      - name: Deploy
+        uses: cloudtype-github-actions/deploy@v1
+        with:
+          token: ${{ secrets.CLOUDTYPE_TOKEN }}
+          project: koreigner/be-springboot
+          stage: main
+          yaml: >
+            name: be-springboot
+
+            app: java@21
+
+            options:
+              ports: 8080
+              strategy: rolling
+              env:
+                - name: DB_NAME
+                  value: ${{secrets.DB_NAME}}
+                - name: DB_PASSWORD
+                  value: ${{secrets.DB_PASSWORD}}
+                - name: DB_URL
+                  value: ${{secrets.DB_URL}}
+                - name: DB_USERNAME
+                  value: ${{secrets.DB_USERNAME}}
+                - name: GOOGLE_CLIENT_ID
+                  value: ${{secrets.GOOGLE_CLIENT_ID}}
+                - name: GOOGLE_CLIENT_SECRET
+                  value: ${{secrets.GOOGLE_CLIENT_SECRET}}
+                - name: JWT_SECRET_KEY
+                  value: ${{secrets.JWT_SECRET_KEY}}
+            context:
+              git:
+                url: git@github.com:${{ github.repository }}.git
+                ref: ${{ github.ref }}
