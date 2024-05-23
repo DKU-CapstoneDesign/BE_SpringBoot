@@ -36,9 +36,6 @@ public class User implements UserDetails {
     @Column(name = "birth_date")
     private String birthDate;
 
-    @Column(name = "username", nullable = false, length = 20)
-    private String username;
-
     @Column(name = "role", nullable = false, length = 30)
     @Enumerated(value = EnumType.STRING)
     private UserRoleEnum role;
