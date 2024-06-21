@@ -23,10 +23,8 @@ public class BoardController {
     // 게시글 작성
     @PostMapping("/api/post")
     public ApiResponseDto<BoardResponseDto> createPost(@RequestBody BoardRequestsDto requestsDto) {
-
         return boardService.createPost(requestsDto);
     }
-
 
     // 게시글 전체 목록 조회
     @GetMapping("/api/posts")
@@ -34,8 +32,6 @@ public class BoardController {
 
         return boardService.getPosts();
     }
-
-
 
     // 선택된 게시글 조회
     @GetMapping("/api/post/{id}")

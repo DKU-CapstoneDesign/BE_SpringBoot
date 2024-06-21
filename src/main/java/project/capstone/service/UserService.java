@@ -17,17 +17,18 @@ public class UserService {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
         return userRepository.save(
-                User
-                        .builder()
-                        .email(dto.getEmail())
-                        .password(encoder.encode(dto.getPassword()))
-                        .nickname(dto.getNickname())
-                        .country(dto.getCountry())
-                        .birthDate(dto.getBirthDate())
-                        .build()
+                        User
+                                .builder()
+                                .email(dto.getEmail())
+                                .password(encoder.encode(dto.getPassword()))
+                                .nickname(dto.getNickname())
+                                .country(dto.getCountry())
+                                .birthDate(dto.getBirthDate())
+                                .build()
                 )
                 .getId();
     }
+
     public Long save(User dto) {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 

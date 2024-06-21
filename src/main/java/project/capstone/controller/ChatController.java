@@ -120,7 +120,6 @@ public class ChatController {
 
     // 검색 닉네임이 포함된 채팅방 모두 가져오기
     // 채팅방을 찾고, 채팅방의 마지막 메시지를 가져와서 세팅해주기
-    // lastmessage 세팅하기
     @GetMapping(value = "/api/chat/list/nickname/{nickname}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ChatRoom> getRoomsByNickname(@PathVariable String nickname){
         // nickname -> User(ID)
@@ -129,7 +128,6 @@ public class ChatController {
         // User(ID) -> ChatRoomMembers
         List<ChatRoomMembers> chatRoomMembers = chatRoomMembersService.findByUserId(userId);
 
-        // 채팅방 별 읽음 상태 정보 세팅하기
         return Flux.fromIterable(chatRoomMembers)
                 //ChatRoomMembers -> ChatRoom
                 .map(chatRoomMember -> {
