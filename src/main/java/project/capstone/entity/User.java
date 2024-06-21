@@ -36,7 +36,7 @@ public class User implements UserDetails {
     @Column(name = "birth_date")
     private String birthDate;
 
-    @Column(name = "role", nullable = false, length = 30)
+    @Column(name = "role", nullable = true, length = 30)
     @Enumerated(value = EnumType.STRING)
     private UserRoleEnum role;
 

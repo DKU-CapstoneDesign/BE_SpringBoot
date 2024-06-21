@@ -18,7 +18,7 @@ import project.capstone.service.UserService;
 public class UserApiController {
 
     private final UserService userService;
-
+    @CrossOrigin
     @PostMapping("/api/signup")
     public Signup signup(AddUserRequest request) {
         Signup signup = new Signup();
