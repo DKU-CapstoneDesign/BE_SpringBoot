@@ -3,17 +3,24 @@ package project.capstone.service;
 import com.mongodb.client.result.UpdateResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import project.capstone.controller.ChatController;
 import project.capstone.entity.ChatMessage;
+import project.capstone.entity.ChatRoom;
 import project.capstone.entity.ChatRoomMembers;
 import project.capstone.entity.User;
+import project.capstone.event.ChatRoomUpdatedEvent;
 import project.capstone.repository.ChatMessageRepository;
+import project.capstone.repository.ChatRoomRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,6 +31,8 @@ import java.util.List;
 public class ChatMessageService {
     private final ReactiveMongoTemplate mongoTemplate;
 
+    private final ApplicationEventPublisher eventPublisher;
+    private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final UserService userService;
     private final ChatRoomMembersService chatRoomMembersService;
@@ -75,7 +84,12 @@ public class ChatMessageService {
             }
         }
 
-        return chatMessageRepository.save(chatMessage);
+        return chatMessageRepository.save(chatMessage)
+                .doOnNext(savedMessage -> {
+                    // 이벤트 발생
+                    ChatRoom chatRoom = chatRoomRepository.findById(Long.valueOf(chatMessage.getRoomNum())).orElseThrow();
+                    eventPublisher.publishEvent(new ChatRoomUpdatedEvent(chatRoom, chatMessage));
+                });
     }
 
 }
