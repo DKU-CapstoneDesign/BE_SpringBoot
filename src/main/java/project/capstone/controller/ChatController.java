@@ -23,7 +23,6 @@ import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -170,13 +169,6 @@ public class ChatController {
             readList.add(new Read(chatRoomMembers.getChatRoom().getId().toString(), chatRoomMembers.isRead()));
         }
         return ResponseEntity.ok(readList);
-    }
-
-    @CrossOrigin
-    @PutMapping(value = "/api/chat/room/update/{roomNum}")
-    public Mono<UpdateResult> updateUpdatedAt(@PathVariable String roomNum) {
-        log.info("request: update updatedAt");
-        return chatRoomService.updateTime(roomNum);
     }
 
 }

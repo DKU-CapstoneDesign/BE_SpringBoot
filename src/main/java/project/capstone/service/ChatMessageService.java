@@ -4,13 +4,11 @@ import com.mongodb.client.result.UpdateResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
-import project.capstone.controller.ChatController;
 import project.capstone.entity.ChatMessage;
 import project.capstone.entity.ChatRoom;
 import project.capstone.entity.ChatRoomMembers;
@@ -20,10 +18,11 @@ import project.capstone.repository.ChatMessageRepository;
 import project.capstone.repository.ChatRoomRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,6 +34,7 @@ public class ChatMessageService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final UserService userService;
+    private final ChatRoomService chatRoomService;
     private final ChatRoomMembersService chatRoomMembersService;
 
     public Flux<ChatMessage> findBySender(String sender, String receiver) {
@@ -74,13 +74,17 @@ public class ChatMessageService {
         List<ChatRoomMembers> senderRooms = chatRoomMembersService.findByUserId(sender.getId());
         List<ChatRoomMembers> receiverRooms = chatRoomMembersService.findByUserId(receiver.getId());
 
-        // TODO: 개선 필요
+        Map<Long, ChatRoomMembers> senderRoomMap = new HashMap<>();
         for (ChatRoomMembers senderRoom : senderRooms) {
-            for (ChatRoomMembers receiverRoom : receiverRooms) {
-                if (senderRoom.getChatRoom().getId().equals(receiverRoom.getChatRoom().getId())) {
-                    chatMessage.setRoomNum(senderRoom.getChatRoom().getId().toString());
-                    break;
-                }
+            senderRoomMap.put(senderRoom.getChatRoom().getId(), senderRoom);
+        }
+
+        for (ChatRoomMembers receiverRoom : receiverRooms) {
+            Long receiverRoomId = receiverRoom.getChatRoom().getId();
+            if (senderRoomMap.containsKey(receiverRoomId)) {
+                chatMessage.setRoomNum(receiverRoomId.toString());
+                chatRoomService.updateTime(chatMessage.getRoomNum());
+                break;
             }
         }
 
