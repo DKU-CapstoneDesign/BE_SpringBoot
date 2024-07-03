@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import project.capstone.dto.CreateChatRoomByNickname;
 import project.capstone.dto.Read;
@@ -14,6 +13,7 @@ import project.capstone.entity.ChatRoom;
 import project.capstone.entity.ChatRoomMembers;
 import project.capstone.entity.User;
 import project.capstone.event.ChatRoomUpdatedEvent;
+import project.capstone.event.ReadStatusUpdatedEvent;
 import project.capstone.service.ChatMessageService;
 import project.capstone.service.ChatRoomMembersService;
 import project.capstone.service.ChatRoomService;
@@ -24,7 +24,6 @@ import reactor.core.publisher.Sinks;
 import reactor.core.scheduler.Schedulers;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,6 +38,7 @@ public class ChatController {
     private final UserService userService;
     private final ChatRoomService chatRoomService;
     private final Sinks.Many<ChatRoom> chatRoomSink = Sinks.many().multicast().onBackpressureBuffer();
+    private final Sinks.Many<Read> readSink = Sinks.many().multicast().onBackpressureBuffer();
 
     // 대화 기록 가져오기 (송수신자 닉네임 기반)
     @CrossOrigin
@@ -156,19 +156,62 @@ public class ChatController {
     }
 
     // 채팅방 별 읽음 여부 가져오기
-    @GetMapping(value = "/api/chat/read/nickname/{nickname}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<Read>> getReadsByNickname(@PathVariable String nickname){
+    @GetMapping(value = "/api/chat/read/nickname/{nickname}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<Read> getReadsByNickname(@PathVariable String nickname) {
+        // nickname -> User
         User user = userService.findByNickname(nickname);
-        List<ChatRoomMembers> chatRoomMembersList = chatRoomMembersService.findAllByUser(user);
-        List<Read> readList = new ArrayList<>();
 
-        for (ChatRoomMembers chatRoomMembers : chatRoomMembersList) {
-            boolean hasUnreadMessage = chatMessageService.existsByRoomNumAndReceiverAndReadFalse(chatRoomMembers.getChatRoom().getId().toString(), nickname).block();
-            chatRoomMembers.setRead(!hasUnreadMessage);
-            chatRoomMembersService.save(chatRoomMembers);
-            readList.add(new Read(chatRoomMembers.getChatRoom().getId().toString(), chatRoomMembers.isRead()));
+        // User -> ChatRoomMembers
+        List<ChatRoomMembers> chatRoomMembersList = chatRoomMembersService.findAllByUser(user);
+
+        // 채팅방 별 읽음 여부 확인
+        Flux<Read> initialData = Flux.fromIterable(chatRoomMembersList)
+                .flatMap(chatRoomMembers -> {
+                    // 비동기적으로 채팅 메시지 읽음 여부 확인
+                    return chatMessageService.existsByRoomNumAndReceiverAndReadFalse(chatRoomMembers.getChatRoom().getId().toString(), nickname)
+                            .map(hasUnreadMessage -> {
+                                // 안 읽은 메시지가 있다 == 읽지 않은 상태 == isRead = false, hasUnreadMessage = true
+                                boolean isRead = !hasUnreadMessage;
+                                chatRoomMembers.setRead(isRead);
+
+                                // 동기적으로 저장
+                                chatRoomMembersService.save(chatRoomMembers);
+
+                                return new Read(chatRoomMembers.getChatRoom().getId().toString(), isRead, nickname);
+                            });
+                })
+                .doOnNext(read -> log.info("initialData element: {}", read))
+                .doOnComplete(() -> log.info("initialData complete"));
+
+        Flux<Read> updates = readSink.asFlux()
+                .doOnNext(read -> log.info("readSink event received: {}", read))
+                .filter(read -> chatRoomMembersService.findAllByUser(user).stream()
+                        .anyMatch(chatRoomMember -> chatRoomMember.getChatRoom().getId().toString().equals(read.getRoomNum())
+                                && chatRoomMember.getUser().getNickname().equals(nickname)))
+                .map(read -> {
+                    log.info("updates element: {}", read);
+                    return read;
+                })
+                .doOnComplete(() -> log.info("updates complete"));
+
+        return Flux.concat(initialData, updates);
+    }
+
+    @EventListener
+    public void handleReadStatusUpdatedEvent(ReadStatusUpdatedEvent event) {
+        Read read = event.getRead();
+        User user = userService.findByNickname(read.getNickname());
+        ChatRoomMembers chatRoomMembers = chatRoomMembersService.findByIdUserIdAndIdRoomId(user.getId(), Long.valueOf(read.getRoomNum()));
+        chatRoomMembers.setRead(!read.isRead());
+        log.info("isRead: {}", !read.isRead());
+        chatRoomMembersService.save(chatRoomMembers);
+
+        boolean success = readSink.tryEmitNext(read).isSuccess();
+        if (success) {
+            log.info("Event emitted to readSink: {}", read);
+        } else {
+            log.error("Failed to emit event to readSink: {}", read);
         }
-        return ResponseEntity.ok(readList);
     }
 
 }
