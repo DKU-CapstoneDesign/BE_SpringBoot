@@ -10,4 +10,5 @@ import lombok.Setter;
 public class Read {
     private String roomNum;
     private boolean read;
+    private String nickname;
 }

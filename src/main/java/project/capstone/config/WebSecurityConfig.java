@@ -1,6 +1,5 @@
 package project.capstone.config;
 
-import com.nimbusds.jose.shaded.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,11 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import project.capstone.dto.Login;
-import project.capstone.dto.Logout;
 import project.capstone.service.UserDetailService;
-
-import java.io.PrintWriter;
 
 @RequiredArgsConstructor
 @Configuration

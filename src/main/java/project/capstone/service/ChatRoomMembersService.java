@@ -26,6 +26,10 @@ public class ChatRoomMembersService {
         return chatRoomMembersRepository.findAllByUser(user).orElseThrow();
     }
 
+    public ChatRoomMembers findByIdUserIdAndIdRoomId(Long userId, Long roomId){
+        return chatRoomMembersRepository.findByIdUserIdAndIdRoomId(userId, roomId).orElseThrow();
+    }
+
     public ChatRoomMembers save(ChatRoomMembers chatRoomMembers){
         return chatRoomMembersRepository.save(chatRoomMembers);
     }

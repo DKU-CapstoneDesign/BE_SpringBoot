@@ -9,11 +9,13 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
+import project.capstone.dto.Read;
 import project.capstone.entity.ChatMessage;
 import project.capstone.entity.ChatRoom;
 import project.capstone.entity.ChatRoomMembers;
 import project.capstone.entity.User;
 import project.capstone.event.ChatRoomUpdatedEvent;
+import project.capstone.event.ReadStatusUpdatedEvent;
 import project.capstone.repository.ChatMessageRepository;
 import project.capstone.repository.ChatRoomRepository;
 import reactor.core.publisher.Flux;
@@ -55,7 +57,11 @@ public class ChatMessageService {
                 .and("receiver").is(nickname));
         Update update = Update.update("read", true);
 
-        return mongoTemplate.updateMulti(query, update, ChatMessage.class);
+        return mongoTemplate.updateMulti(query, update, ChatMessage.class)
+                .doOnNext(savedMessage -> {
+                    // 이벤트 발생
+                    eventPublisher.publishEvent(new ReadStatusUpdatedEvent(new Read (roomNum, true, nickname)));
+                });
     }
 
     public Mono<Boolean> existsByRoomNumAndReceiverAndReadFalse(String roomNum, String nickname) {
@@ -93,6 +99,7 @@ public class ChatMessageService {
                     // 이벤트 발생
                     ChatRoom chatRoom = chatRoomRepository.findById(Long.valueOf(chatMessage.getRoomNum())).orElseThrow();
                     eventPublisher.publishEvent(new ChatRoomUpdatedEvent(chatRoom, chatMessage));
+                    eventPublisher.publishEvent(new ReadStatusUpdatedEvent(new Read (chatMessage.getRoomNum(), chatMessage.isRead(), chatMessage.getReceiver())));
                 });
     }
 
