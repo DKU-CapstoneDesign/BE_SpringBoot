@@ -23,7 +23,7 @@ public class ChatRoomMembers {
     @JoinColumn(name = "room_id", insertable=false, updatable=false)
     private ChatRoom chatRoom;
 
-    @Column(name = "is_read", nullable = false)
+    @Column(name = "is_read", nullable = false, columnDefinition = "BIT(1) DEFAULT 0")
     private boolean isRead = false;
 }
 
