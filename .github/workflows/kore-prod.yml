@@ -70,5 +70,5 @@ jobs:
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} << 'EOF'
             sudo docker rm -f kore-be
             sudo docker rmi dipic/kore:latest
-            sudo docker run --name kore-be -d dipic/kore:latest
+            sudo docker run -p 8080:8080 --name kore-be -d dipic/kore:latest
           EOF
