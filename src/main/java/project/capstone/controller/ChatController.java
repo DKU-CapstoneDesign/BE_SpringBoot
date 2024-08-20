@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import project.capstone.dto.CreateChatRoomByNickname;
 import project.capstone.dto.Read;
@@ -199,19 +201,20 @@ public class ChatController {
 
     @EventListener
     public void handleReadStatusUpdatedEvent(ReadStatusUpdatedEvent event) {
-        Read read = event.getRead();
-        User user = userService.findByNickname(read.getNickname());
-        ChatRoomMembers chatRoomMembers = chatRoomMembersService.findByIdUserIdAndIdRoomId(user.getId(), Long.valueOf(read.getRoomNum()));
-        chatRoomMembers.setRead(!read.isRead());
-        log.info("isRead: {}", !read.isRead());
-        chatRoomMembersService.save(chatRoomMembers);
+        Read read = event.getRead();;
+        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User eventUser = userService.findByNickname(read.getNickname());
 
-        boolean success = readSink.tryEmitNext(read).isSuccess();
-        if (success) {
-            log.info("Event emitted to readSink: {}", read);
-        } else {
-            log.error("Failed to emit event to readSink: {}", read);
+        if (currentUser != null && currentUser.getId().equals(eventUser.getId())) {
+            ChatRoomMembers chatRoomMembers = chatRoomMembersService.findByIdUserIdAndIdRoomId(eventUser.getId(), Long.valueOf(read.getRoomNum()));
+            chatRoomMembers.setRead(read.isRead());
+            log.info("user: {}", chatRoomMembers.getUser().getNickname());
+            log.info("isRead: {}", read.isRead());
+            chatRoomMembersService.save(chatRoomMembers);
+
+            readSink.tryEmitNext(read);
         }
+
     }
 
 }
