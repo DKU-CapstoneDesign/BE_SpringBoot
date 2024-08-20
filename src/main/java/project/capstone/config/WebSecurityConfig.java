@@ -1,6 +1,5 @@
 package project.capstone.config;
 
-import com.nimbusds.jose.shaded.gson.Gson;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,11 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import project.capstone.dto.Login;
-import project.capstone.dto.Logout;
 import project.capstone.service.UserDetailService;
-
-import java.io.PrintWriter;
 
 @RequiredArgsConstructor
 @Configuration
@@ -40,38 +35,14 @@ public class WebSecurityConfig {
                 .usernameParameter("email")
                 .passwordParameter("password")
                 .loginProcessingUrl("/api/login")
-                .successHandler(
-                        (request, response, authentication) -> {
-                            response.setContentType("application/json");
-
-                            Login login = new Login();
-                            login.setLoggedIn(authentication.getName() != null);
-                            login.setAuthentication(authentication);
-
-                            Gson gson = new Gson();
-                            String jsonData = gson.toJson(login);
-
-                            PrintWriter out = response.getWriter();
-                            out.println(jsonData);
-                        })
+                .successHandler(new LoginSuccessHandler())
                 .and()
                 .logout()
                 .logoutUrl("/api/logout")
-                .logoutSuccessHandler(
-                        (request, response, authentication) -> {
-                            response.setContentType("application/json");
-
-                            Logout logout = new Logout();
-                            logout.setLoggedOut(true);
-
-                            Gson gson = new Gson();
-                            String jsonData = gson.toJson(logout);
-
-                            PrintWriter out = response.getWriter();
-                            out.println(jsonData);
-                        }
-                        )
+                .logoutSuccessHandler(new LogoutSuccessHandler())
                 .invalidateHttpSession(true)
+                .and()
+                .cors()
                 .and()
                 .csrf().disable()
                 .build();
