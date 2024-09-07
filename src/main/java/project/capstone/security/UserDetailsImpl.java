@@ -13,12 +13,10 @@ public class UserDetailsImpl implements UserDetails {
 
     @Getter
     private final User user;
-    private final String username;
 
     // 인증이 완료된 사용자 추가하기
-    public UserDetailsImpl(User user, String username) {
+    public UserDetailsImpl(User user) {
         this.user = user;
-        this.username = username;
     }
 
     @Override
@@ -35,31 +33,31 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public String getPassword() {
-        return null;
+        return user.getPassword();  // 사용자 비밀번호 반환
     }
 
     @Override
     public String getUsername() {
-        return this.username;
+        return user.getUsername();  // 사용자 이름 반환
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;  // 계정이 만료되지 않음을 나타냄
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return false;
+        return true;  // 계정이 잠기지 않음을 나타냄
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;  // 자격 증명이 만료되지 않음을 나타냄
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;  // 계정이 활성화되어 있음을 나타냄
     }
 }

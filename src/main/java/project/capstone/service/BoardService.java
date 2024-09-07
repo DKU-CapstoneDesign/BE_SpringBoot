@@ -1,6 +1,7 @@
 package project.capstone.service;
 
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -66,19 +67,26 @@ public class BoardService {
     // 게시글 작성
     @Transactional
     public ApiResponseDto<BoardResponseDto> createPost(BoardRequestsDto requestsDto) {
-        log.info("request: create post");
-        User user = userRepository.findById(requestsDto.getUserId()).orElseThrow();
+        log.info("게시글 작성 요청 수신: {}", requestsDto);
+
+        // 사용자 조회
+        User user = userRepository.findById(requestsDto.getUserId())
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + requestsDto.getUserId()));
+
+        // 게시글 생성
         Board board = new Board();
         board.setUser(user);
         board.setTitle(requestsDto.getTitle());
         board.setContents(requestsDto.getContents());
-        // 작성 글 저장
-        Board returnBoard = boardRepository.save(board);
-        log.info("board: {}", board);
-        // BoardResponseDto 로 변환 후 responseEntity body 에 담아 반환
-        return ResponseUtils.ok(BoardResponseDto.from(board));
 
+        // 게시글 저장
+        Board returnBoard = boardRepository.save(board);
+        log.info("게시글이 저장되었습니다. board: {}", returnBoard);
+
+        // BoardResponseDto로 변환 후 응답 반환
+        return ResponseUtils.ok(BoardResponseDto.from(returnBoard));
     }
+
 
     // 선택된 게시글 조회
     @Transactional(readOnly = true)

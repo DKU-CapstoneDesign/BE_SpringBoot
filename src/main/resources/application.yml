@@ -41,4 +41,3 @@ springdoc:
     display-request-duration: true
   show-actuator: true
   default-consumes-media-type: application/json
-
