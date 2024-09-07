@@ -19,21 +19,21 @@ public class CommentController {
 
     // 댓글 작성
     @PostMapping("/comment/{id}")
-    public ApiResponseDto<CommentResponseDto> createComment(@PathVariable Long id, @RequestBody CommentRequestDto requestDto,
+    public ApiResponseDto<CommentResponseDto> createComment(@PathVariable("id") Long id, @RequestBody CommentRequestDto requestDto,
                                                             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return commentService.createComment(id, requestDto, userDetails.getUser());
     }
 
     // 댓글 수정
     @PutMapping("/comment/{id}")
-    public ApiResponseDto<CommentResponseDto> updateComment(@PathVariable Long id, @RequestBody CommentRequestDto requestDto,
+    public ApiResponseDto<CommentResponseDto> updateComment(@PathVariable("id") Long id, @RequestBody CommentRequestDto requestDto,
                                                             @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return commentService.updateComment(id, requestDto, userDetails.getUser());
     }
 
     // 댓글 삭제
     @DeleteMapping("/comment/{id}")
-    public ApiResponseDto<SuccessResponse> deleteComment(@PathVariable Long id,
+    public ApiResponseDto<SuccessResponse> deleteComment(@PathVariable("id") Long id,
                                                          @AuthenticationPrincipal UserDetailsImpl userDetails) {
         return commentService.deleteComment(id, userDetails.getUser());
     }
