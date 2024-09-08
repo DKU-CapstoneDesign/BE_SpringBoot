@@ -155,7 +155,7 @@ public class BoardService {
             throw new RestApiException(ErrorType.NOT_WRITER);
         }
 
-        // 게시글 id 와 사용자 정보 일치한다면, 게시글 수정
+        // 게시글 id 와 사용자 정보 일치한다면, 게시글 삭제
         boardRepository.deleteById(id);
         return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "게시글 삭제 성공"));
 
