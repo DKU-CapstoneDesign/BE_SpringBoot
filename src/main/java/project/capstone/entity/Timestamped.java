@@ -1,5 +1,6 @@
 package project.capstone.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;
 import lombok.Getter;
@@ -15,8 +16,10 @@ import java.time.LocalDateTime;
 public class Timestamped {
 
     @CreatedDate
-    private LocalDateTime createdAt;
+    @Column(updatable = false, nullable = false) // 수정 불가, not null
+    protected LocalDateTime createdAt;
 
     @LastModifiedDate
-    private LocalDateTime modifiedAt;
+    @Column(nullable = false) // not null
+    protected LocalDateTime modifiedAt;
 }

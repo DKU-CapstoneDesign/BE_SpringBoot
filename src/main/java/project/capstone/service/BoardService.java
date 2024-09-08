@@ -64,6 +64,8 @@ public class BoardService {
 
     }
 
+
+
     // 게시글 작성
     @Transactional
     public ApiResponseDto<BoardResponseDto> createPost(BoardRequestsDto requestsDto) {
