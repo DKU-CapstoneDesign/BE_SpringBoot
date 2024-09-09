@@ -80,6 +80,7 @@ public class BoardService {
         board.setUser(user);
         board.setTitle(requestsDto.getTitle());
         board.setContents(requestsDto.getContents());
+        board.setCategory(requestsDto.getCategory());  // 카테고리 설정
 
         // 게시글 저장
         Board returnBoard = boardRepository.save(board);

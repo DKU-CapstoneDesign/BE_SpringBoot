@@ -33,17 +33,28 @@ public class Board extends Timestamped {
     @OneToMany(mappedBy = "board", cascade = CascadeType.REMOVE)
     private List<Likes> likesList = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Board.Category category;  // 카테고리 필드 추가
+
+    // 카테고리 Enum 정의
+    public enum Category {
+        TRAVELING, HELPING, ANY
+    }
+
     @Builder
     private Board(BoardRequestsDto requestsDto, User user) {
         this.title = requestsDto.getTitle();
         this.contents = requestsDto.getContents();
         this.user = user;
+        this.category = requestsDto.getCategory();  // 카테고리 설정
     }
 
     public void update(BoardRequestsDto requestsDto, User user) {
         this.title = requestsDto.getTitle();
         this.contents = requestsDto.getContents();
         this.user = user;
+        this.category = requestsDto.getCategory();  // 카테고리 업데이트
     }
 
     public static Board of(BoardRequestsDto requestsDto, User user) {
