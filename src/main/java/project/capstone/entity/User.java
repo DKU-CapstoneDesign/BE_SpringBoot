@@ -47,6 +47,7 @@ public class User implements UserDetails {
         this.nickname = nickname;
         this.country = country;
         this.birthDate = birthDate;
+        this.role = UserRoleEnum.USER;
     }
 
 
