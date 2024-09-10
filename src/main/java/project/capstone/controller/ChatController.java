@@ -201,11 +201,11 @@ public class ChatController {
 
     @EventListener
     public void handleReadStatusUpdatedEvent(ReadStatusUpdatedEvent event) {
-        Read read = event.getRead();;
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Read read = event.getRead();
+        // User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User eventUser = userService.findByNickname(read.getNickname());
 
-        if (currentUser != null && currentUser.getId().equals(eventUser.getId())) {
+        //if (currentUser != null && currentUser.getId().equals(eventUser.getId())) {
             ChatRoomMembers chatRoomMembers = chatRoomMembersService.findByIdUserIdAndIdRoomId(eventUser.getId(), Long.valueOf(read.getRoomNum()));
             chatRoomMembers.setRead(read.isRead());
             log.info("user: {}", chatRoomMembers.getUser().getNickname());
@@ -213,7 +213,7 @@ public class ChatController {
             chatRoomMembersService.save(chatRoomMembers);
 
             readSink.tryEmitNext(read);
-        }
+        //}
 
     }
 
