@@ -37,9 +37,12 @@ public class Board extends Timestamped {
     @Column(nullable = false)
     private Board.Category category;  // 카테고리 필드 추가
 
+    @Column(name = "view_count", nullable = false, columnDefinition = "int default 0")
+    private int viewCount;
+
     // 카테고리 Enum 정의
     public enum Category {
-        TRAVELING, HELPING, ANY
+        TRAVELING, HELPING, ANY, HOT
     }
 
     @Builder

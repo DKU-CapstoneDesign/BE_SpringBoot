@@ -39,7 +39,7 @@ public class BoardService {
     @Transactional(readOnly = true) // 수정 없이 읽기만
     public ApiResponseDto<List<BoardResponseDto>> getPosts() {
 
-        List<Board> boardList = boardRepository.findAllByOrderByModifiedAtDesc();
+        List<Board> boardList = boardRepository.findAllByOrderByCreatedAtDesc();
         List<BoardResponseDto> responseDtoList = new ArrayList<>();
 
         for (Board board : boardList) {

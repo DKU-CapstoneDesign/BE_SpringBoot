@@ -12,7 +12,7 @@ public class BoardResponseDto {
     private final Long id;
     private final String title;
     private final String contents;
-    private final String username;
+    private final String nickname;
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
     private final Integer likeCount;
@@ -23,7 +23,7 @@ public class BoardResponseDto {
         this.id = entity.getId();
         this.title = entity.getTitle();
         this.contents = entity.getContents();
-        this.username = entity.getUser().getUsername();
+        this.nickname = entity.getUser().getNickname();
         this.createdAt = entity.getCreatedAt();
         this.modifiedAt = entity.getModifiedAt();
         this.likeCount = entity.getLikesList() != null ? entity.getLikesList().size() : 0;
@@ -35,7 +35,7 @@ public class BoardResponseDto {
         this.id = entity.getId();
         this.title = entity.getTitle();
         this.contents = entity.getContents();
-        this.username = entity.getUser().getUsername();
+        this.nickname = entity.getUser().getNickname();
         this.createdAt = entity.getCreatedAt();
         this.modifiedAt = entity.getModifiedAt();
         this.likeCount = entity.getLikesList() != null ? entity.getLikesList().size() : 0;

@@ -40,10 +40,14 @@ public class CommentService {
             Comment parentComment = commentRepository.findById(parentCommentId)
                     .orElseThrow(() -> new RestApiException(ErrorType.NOT_FOUND_WRITING));
             parentComment.addChildComment(comment); // 부모 댓글에 자식 댓글 추가
-            commentRepository.save(parentComment); // 부모 댓글 저장
+            // 로그 추가
+            System.out.println("Saving parent comment: " + parentComment);
+//            commentRepository.save(parentComment); // 부모 댓글 저장
         }
 
         // 자식 댓글 저장
+        // 로그 추가
+        System.out.println("Saving child comment: " + comment);
         commentRepository.save(comment);
 
         return ResponseUtils.ok(CommentResponseDto.from(comment));
