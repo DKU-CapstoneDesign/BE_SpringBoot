@@ -10,7 +10,12 @@ import java.util.Optional;
 
 @Repository
 public interface BoardRepository extends JpaRepository<Board, Long> {
+    // 수정 날짜로 내림차순 정렬
     List<Board> findAllByOrderByModifiedAtDesc();
+
+    // 생성 날짜로 내림차순 정렬
+    List<Board> findAllByOrderByCreatedAtDesc();
+
     Optional<Board> findByIdAndUser(Long id, User user);
 
     void deleteAllByUser(User user);
