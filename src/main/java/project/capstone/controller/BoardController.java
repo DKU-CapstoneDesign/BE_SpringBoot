@@ -36,7 +36,8 @@ public class BoardController {
     // 선택된 게시글 조회
     @GetMapping("/api/post/{id}")
     public ApiResponseDto<BoardResponseDto> getPost(@PathVariable("id") Long id) {
-        return boardService.getPost(id);
+        User user = getCurrentUser();  // 현재 사용자를 가져옴
+        return boardService.getPost(id, user);  // 가져온 사용자 정보를 서비스로 전달
     }
 
     // 선택된 게시글 수정

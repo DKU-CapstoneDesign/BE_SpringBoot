@@ -92,31 +92,37 @@ public class BoardService {
 
 
     // 선택된 게시글 조회
-    @Transactional(readOnly = true)
-    public ApiResponseDto<BoardResponseDto> getPost(Long id) {
+    @Transactional
+    public ApiResponseDto<BoardResponseDto> getPost(Long id, User currentUser) {
         // Id에 해당하는 게시글이 있는지 확인
-        Optional<Board> board = boardRepository.findById(id);
-        if (board.isEmpty()) { // 해당 게시글이 없다면
+        Optional<Board> boardOptional = boardRepository.findById(id);
+        if (boardOptional.isEmpty()) { // 해당 게시글이 없다면
             throw new RestApiException(ErrorType.NOT_FOUND_WRITING);
         }
 
+        Board board = boardOptional.get();
+
+        // 현재 사용자가 게시글 작성자가 아닐 경우 조회수 증가
+        if (!board.getUser().getId().equals(currentUser.getId())) {
+            board.setViewCount(board.getViewCount() + 1);
+            boardRepository.flush(); // 즉시 DB에 반영
+        }
+
         // 댓글리스트 작성일자 기준 내림차순 정렬
-        board.get()
-                .getCommentList()
-                .sort(Comparator.comparing(Comment::getModifiedAt)
-                        .reversed());
+        board.getCommentList().sort(Comparator.comparing(Comment::getModifiedAt).reversed());
 
         // 대댓글은 제외 부분 작성
         List<CommentResponseDto> commentList = new ArrayList<>();
-        for (Comment comment : board.get().getCommentList()) {
+        for (Comment comment : board.getCommentList()) {
             if (comment.getParentCommentId() == null) {
                 commentList.add(CommentResponseDto.from(comment));
             }
         }
 
         // board 를 responseDto 로 변환 후, ResponseEntity body 에 dto 담아 리턴
-        return ResponseUtils.ok(BoardResponseDto.from(board.get(), commentList));
+        return ResponseUtils.ok(BoardResponseDto.from(board, commentList));
     }
+
 
     // 선택된 게시글 수정
     @Transactional
