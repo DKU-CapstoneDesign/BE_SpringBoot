@@ -40,6 +40,9 @@ public class Board extends Timestamped {
     @Column(name = "view_count", nullable = false, columnDefinition = "int default 0")
     private int viewCount;
 
+    @Column(name = "likes_count", nullable = false, columnDefinition = "int default 0")
+    private int likesCount;
+
     // 카테고리 Enum 정의
     public enum Category {
         TRAVELING, HELPING, ANY, HOT
@@ -50,14 +53,14 @@ public class Board extends Timestamped {
         this.title = requestsDto.getTitle();
         this.contents = requestsDto.getContents();
         this.user = user;
-        this.category = requestsDto.getCategory();  // 카테고리 설정
+        this.category = requestsDto.getCategory();
     }
 
     public void update(BoardRequestsDto requestsDto, User user) {
         this.title = requestsDto.getTitle();
         this.contents = requestsDto.getContents();
         this.user = user;
-        this.category = requestsDto.getCategory();  // 카테고리 업데이트
+        this.category = requestsDto.getCategory();
     }
 
     public static Board of(BoardRequestsDto requestsDto, User user) {
@@ -65,5 +68,15 @@ public class Board extends Timestamped {
                 .requestsDto(requestsDto)
                 .user(user)
                 .build();
+    }
+
+    public void incrementLikes() {
+        this.likesCount++;
+    }
+
+    public void decrementLikes() {
+        if (this.likesCount > 0) {
+            this.likesCount--;
+        }
     }
 }

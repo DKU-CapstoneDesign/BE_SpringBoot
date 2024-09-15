@@ -10,6 +10,7 @@ import project.capstone.dto.BoardRequestsDto;
 import project.capstone.dto.BoardResponseDto;
 import project.capstone.entity.User;
 import project.capstone.service.BoardService;
+import project.capstone.service.LikeService;
 import project.capstone.service.UserService;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class BoardController {
 
     private final BoardService boardService;
     private final UserService userService;
+    private final LikeService likeService;
 
     // 게시글 작성
     @PostMapping("/api/post")
@@ -53,6 +55,18 @@ public class BoardController {
     public ApiResponseDto<SuccessResponse> deletePost(@PathVariable("id") Long id) {
         User user = getCurrentUser();
         return boardService.deletePost(id, user);
+    }
+
+    // 게시글 좋아요 추가 및 취소
+    @PostMapping("/api/post/{id}/likes")
+    public ApiResponseDto<String> likePost(@PathVariable("id") Long id) {
+        User user = getCurrentUser();  // 현재 사용자를 가져옴
+        boolean liked = likeService.likePost(id, user);  // 좋아요 추가 또는 취소
+
+        if (!liked) {
+            return ApiResponseDto.success("좋아요 취소");
+        }
+        return ApiResponseDto.success("좋아요를 눌렀습니다.");
     }
 
     // 현재 인증된 사용자 정보를 가져오는 메서드

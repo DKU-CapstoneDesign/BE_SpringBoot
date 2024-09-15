@@ -16,5 +16,11 @@ public class ApiResponseDto<T> {
         this.response = response;
         this.error = error;
     }
-
+    // 성공 응답을 생성하는 메서드
+    public static ApiResponseDto<String> success(String message) {
+        return ApiResponseDto.<String>builder()
+                .success(true)
+                .response(message)
+                .build();
+    }
 }

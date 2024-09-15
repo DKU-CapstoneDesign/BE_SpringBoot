@@ -10,5 +10,5 @@ public class BoardRequestsDto {
     private String title;
     private String contents;
     private Long userId;
-    private Board.Category category;  // 카테고리 필드 추가
+    private Board.Category category;
 }
