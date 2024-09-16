@@ -24,7 +24,7 @@ public class CommentController {
     @PostMapping("/comment/{id}")
     public ApiResponseDto<CommentResponseDto> createComment(@PathVariable("id") Long id, @RequestBody CommentRequestDto requestDto) {
         User user = getCurrentUser();
-        // 요청이 제대로 들어오는지 로그로 확인
+
         System.out.println("Contents: " + requestDto.getContents());
         System.out.println("ParentCommentId: " + requestDto.getParentCommentId());
 

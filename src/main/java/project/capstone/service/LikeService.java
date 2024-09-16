@@ -36,14 +36,14 @@ public class LikeService {
             Likes likes = Likes.of(board, user);
             likesRepository.save(likes);
             board.incrementLikes();
-            boardRepository.save(board);  // board를 저장하여 변경 사항 반영
-            return true; // 좋아요가 추가됨
+            boardRepository.save(board);
+            return true;
         } else { // 좋아요 누른 적 있음
-            likesRepository.delete(found.get()); // 좋아요 눌렀던 정보를 지운다.
+            likesRepository.delete(found.get());
             likesRepository.flush();
             board.decrementLikes();
-            boardRepository.save(board);  // board를 저장하여 변경 사항 반영
-            return false; // 좋아요가 취소됨
+            boardRepository.save(board);
+            return false;
         }
     }
 }

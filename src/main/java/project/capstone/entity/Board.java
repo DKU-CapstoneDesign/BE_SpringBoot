@@ -35,13 +35,16 @@ public class Board extends Timestamped {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Board.Category category;  // 카테고리 필드 추가
+    private Board.Category category;
 
     @Column(name = "view_count", nullable = false, columnDefinition = "int default 0")
     private int viewCount;
 
     @Column(name = "likes_count", nullable = false, columnDefinition = "int default 0")
     private int likesCount;
+
+    @OneToMany(mappedBy = "board", cascade = CascadeType.ALL)
+    private List<Attachment> attachments = new ArrayList<>();
 
     // 카테고리 Enum 정의
     public enum Category {
