@@ -1,12 +1,12 @@
 package project.capstone.service;
 
-
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import project.capstone.common.ApiResponseDto;
 import project.capstone.common.ResponseUtils;
 import project.capstone.common.SuccessResponse;
@@ -16,12 +16,18 @@ import project.capstone.dto.CommentResponseDto;
 import project.capstone.entity.Board;
 import project.capstone.entity.Comment;
 import project.capstone.entity.User;
+import project.capstone.entity.Attachment;
 import project.capstone.entity.enumSet.ErrorType;
 import project.capstone.entity.enumSet.UserRoleEnum;
 import project.capstone.exception.RestApiException;
 import project.capstone.repository.BoardRepository;
 import project.capstone.repository.UserRepository;
+import project.capstone.repository.AttachmentRepository;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -34,11 +40,11 @@ public class BoardService {
 
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
+    private final AttachmentRepository attachmentRepository;
 
     // 게시글 전체 목록 조회
-    @Transactional(readOnly = true) // 수정 없이 읽기만
+    @Transactional(readOnly = true)
     public ApiResponseDto<List<BoardResponseDto>> getPosts() {
-
         List<Board> boardList = boardRepository.findAllByOrderByCreatedAtDesc();
         List<BoardResponseDto> responseDtoList = new ArrayList<>();
 
@@ -61,91 +67,172 @@ public class BoardService {
         }
 
         return ResponseUtils.ok(responseDtoList);
-
     }
-
-
 
     // 게시글 작성
     @Transactional
-    public ApiResponseDto<BoardResponseDto> createPost(BoardRequestsDto requestsDto) {
-        log.info("게시글 작성 요청 수신: {}", requestsDto);
+    public ApiResponseDto<BoardResponseDto> createPost(
+            Long userId,
+            String title,
+            String contents,
+            Board.Category category,
+            List<MultipartFile> attachments // 파일은 선택사항
+    ) {
+        log.info("게시글 작성 요청 수신: userId={}, title={}, contents={}, category={}", userId, title, contents, category);
+
+        // 사용자 확인
+        if (userId == null) {
+            throw new IllegalArgumentException("User ID는 null일 수 없습니다.");
+        }
 
         // 사용자 조회
-        User user = userRepository.findById(requestsDto.getUserId())
-                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + requestsDto.getUserId()));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다. ID: " + userId));
 
         // 게시글 생성
         Board board = new Board();
         board.setUser(user);
-        board.setTitle(requestsDto.getTitle());
-        board.setContents(requestsDto.getContents());
-        board.setCategory(requestsDto.getCategory());  // 카테고리 설정
+        board.setTitle(title);
+        board.setContents(contents);
+        board.setCategory(category);
 
         // 게시글 저장
-        Board returnBoard = boardRepository.save(board);
-        log.info("게시글이 저장되었습니다. board: {}", returnBoard);
+        Board savedBoard = boardRepository.save(board);
+        log.info("게시글이 저장되었습니다. board: {}", savedBoard);
+
+        // 파일 처리
+        if (attachments != null && !attachments.isEmpty()) {
+            String uploadDir = "/Users/heoyeonjae/Postman"; //  포스트맨 Working directory 주소 "/Users/{}/Postman"
+            try {
+                Files.createDirectories(Paths.get(uploadDir)); // 업로드 디렉토리 생성
+            } catch (IOException e) {
+                log.error("업로드 디렉토리 생성 실패", e);
+                throw new RuntimeException("업로드 디렉토리 생성 실패");
+            }
+
+            for (MultipartFile file : attachments) {
+                if (!file.isEmpty()) {
+//                    log.info("첨부파일 이름: {}", file.getOriginalFilename()); // 파일 이름 로그 출력
+                    String originalFileName = file.getOriginalFilename();
+                    String filePath = uploadDir + "/" + originalFileName;
+
+                    try {
+                        Path path = Paths.get(filePath);
+                        Files.write(path, file.getBytes());
+
+                        // Attachment 엔티티 생성 및 저장
+                        Attachment attachment = new Attachment(savedBoard, originalFileName, filePath);
+                        attachmentRepository.save(attachment);
+                    } catch (IOException e) {
+                        log.error("파일 저장 실패", e);
+                        throw new RuntimeException("파일 저장 실패");
+                    }
+                }
+            }
+        }
 
         // BoardResponseDto로 변환 후 응답 반환
-        return ResponseUtils.ok(BoardResponseDto.from(returnBoard));
+        return ResponseUtils.ok(BoardResponseDto.from(savedBoard));
     }
 
-
     // 선택된 게시글 조회
-    @Transactional(readOnly = true)
-    public ApiResponseDto<BoardResponseDto> getPost(Long id) {
+    @Transactional
+    public ApiResponseDto<BoardResponseDto> getPost(Long id, User currentUser) {
+        if (id == null) {
+            throw new IllegalArgumentException("ID 값이 null일 수 없습니다.");
+        }
         // Id에 해당하는 게시글이 있는지 확인
-        Optional<Board> board = boardRepository.findById(id);
-        if (board.isEmpty()) { // 해당 게시글이 없다면
+        Optional<Board> boardOptional = boardRepository.findById(id);
+        if (boardOptional.isEmpty()) { // 해당 게시글이 없다면
             throw new RestApiException(ErrorType.NOT_FOUND_WRITING);
         }
 
+        Board board = boardOptional.get();
+
+        // 현재 사용자가 게시글 작성자가 아닐 경우 조회수 증가
+        if (!board.getUser().getId().equals(currentUser.getId())) {
+            board.setViewCount(board.getViewCount() + 1);
+            boardRepository.flush(); // 즉시 DB에 반영
+        }
+
         // 댓글리스트 작성일자 기준 내림차순 정렬
-        board.get()
-                .getCommentList()
-                .sort(Comparator.comparing(Comment::getModifiedAt)
-                        .reversed());
+        board.getCommentList().sort(Comparator.comparing(Comment::getModifiedAt).reversed());
 
         // 대댓글은 제외 부분 작성
         List<CommentResponseDto> commentList = new ArrayList<>();
-        for (Comment comment : board.get().getCommentList()) {
+        for (Comment comment : board.getCommentList()) {
             if (comment.getParentCommentId() == null) {
                 commentList.add(CommentResponseDto.from(comment));
             }
         }
 
         // board 를 responseDto 로 변환 후, ResponseEntity body 에 dto 담아 리턴
-        return ResponseUtils.ok(BoardResponseDto.from(board.get(), commentList));
+        return ResponseUtils.ok(BoardResponseDto.from(board, commentList));
     }
 
     // 선택된 게시글 수정
     @Transactional
     public ApiResponseDto<BoardResponseDto> updatePost(Long id, BoardRequestsDto requestsDto, User user) {
-
         // 선택한 게시글이 DB에 있는지 확인
-        Optional<Board> board = boardRepository.findById(id);
-        if (board.isEmpty()) {
+        Optional<Board> boardOptional = boardRepository.findById(id);
+        if (boardOptional.isEmpty()) {
             throw new RestApiException(ErrorType.NOT_FOUND_WRITING);
         }
 
-        // 선택한 게시글의 작성자와 토큰에서 가져온 사용자 정보가 일치하는지 확인 (수정하려는 사용자가 관리자라면 게시글 수정 가능)
+        Board board = boardOptional.get();
+
+        // 선택한 게시글의 작성자와 토큰에서 가져온 사용자 정보가 일치하는지 확인
         Optional<Board> found = boardRepository.findByIdAndUser(id, user);
-        if (found.isEmpty() && user.getRole() == UserRoleEnum.USER) { // 일치하는 게시물이 없다면
+        if (found.isEmpty() && user.getRole() == UserRoleEnum.USER) {
             throw new RestApiException(ErrorType.NOT_WRITER);
         }
 
-        // 게시글 id 와 사용자 정보 일치한다면, 게시글 수정
-        board.get().update(requestsDto, user);
-        boardRepository.flush(); // responseDto 에 modifiedAt 업데이트 해주기 위해 flush 사용
+        // 파일 처리
+        List<Attachment> attachments = attachmentRepository.findByBoard(board);
+        for (Attachment attachment : attachments) {
+            attachmentRepository.delete(attachment); // 기존 파일 삭제
+        }
 
-        return ResponseUtils.ok(BoardResponseDto.from(board.get()));
+        if (requestsDto.getAttachments() != null) {
+            String uploadDir = "/Users/heoyeonjae/Postman"; // 수정된 절대 경로
+            try {
+                Files.createDirectories(Paths.get(uploadDir)); // 업로드 디렉토리 생성
+            } catch (IOException e) {
+                log.error("업로드 디렉토리 생성 실패", e);
+                throw new RuntimeException("업로드 디렉토리 생성 실패");
+            }
 
+            for (MultipartFile file : requestsDto.getAttachments()) {
+                if (!file.isEmpty()) {
+//                    log.info("첨부파일 이름: {}", file.getOriginalFilename()); // 파일 이름 로그 출력
+                    String originalFileName = file.getOriginalFilename();
+                    String filePath = uploadDir + "/" + originalFileName;
+
+                    try {
+                        Path path = Paths.get(filePath);
+                        Files.write(path, file.getBytes());
+
+                        // Attachment 엔티티 생성 및 저장
+                        Attachment attachment = new Attachment(board, originalFileName, filePath);
+                        attachmentRepository.save(attachment);
+                    } catch (IOException e) {
+                        log.error("파일 저장 실패", e);
+                        throw new RuntimeException("파일 저장 실패");
+                    }
+                }
+            }
+        }
+
+        // 게시글 수정
+        board.update(requestsDto, user);
+        boardRepository.flush(); // 즉시 DB에 반영
+
+        return ResponseUtils.ok(BoardResponseDto.from(board));
     }
 
     // 게시글 삭제
     @Transactional
     public ApiResponseDto<SuccessResponse> deletePost(Long id, User user) {
-
         // 선택한 게시글이 DB에 있는지 확인
         Optional<Board> found = boardRepository.findById(id);
         if (found.isEmpty()) {
@@ -158,10 +245,20 @@ public class BoardService {
             throw new RestApiException(ErrorType.NOT_WRITER);
         }
 
-        // 게시글 id 와 사용자 정보 일치한다면, 게시글 삭제
+        // 게시글과 연관된 파일 삭제
+        List<Attachment> attachments = attachmentRepository.findByBoard(board.get());
+        for (Attachment attachment : attachments) {
+            try {
+                Path path = Paths.get(attachment.getFilePath());
+                Files.deleteIfExists(path); // 파일 시스템에서 파일 삭제
+            } catch (IOException e) {
+                log.error("파일 삭제 실패", e);
+            }
+            attachmentRepository.delete(attachment); // 데이터베이스에서 파일 삭제
+        }
+
+        // 게시글 삭제
         boardRepository.deleteById(id);
         return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "게시글 삭제 성공"));
-
     }
-
 }

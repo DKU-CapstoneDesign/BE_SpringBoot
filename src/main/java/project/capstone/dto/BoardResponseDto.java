@@ -16,8 +16,9 @@ public class BoardResponseDto {
     private final LocalDateTime createdAt;
     private final LocalDateTime modifiedAt;
     private final Integer likeCount;
-    private final Board.Category category;  // 카테고리 필드 추가
+    private final Board.Category category;
     private final List<CommentResponseDto> commentList;
+    private final List<AttachmentResponseDto> attachments;
 
     private BoardResponseDto(Board entity, List<CommentResponseDto> list) {
         this.id = entity.getId();
@@ -27,8 +28,11 @@ public class BoardResponseDto {
         this.createdAt = entity.getCreatedAt();
         this.modifiedAt = entity.getModifiedAt();
         this.likeCount = entity.getLikesList() != null ? entity.getLikesList().size() : 0;
-        this.category = entity.getCategory();  // 카테고리 설정
+        this.category = entity.getCategory();
         this.commentList = list;
+        this.attachments = entity.getAttachments().stream()
+                .map(AttachmentResponseDto::from)
+                .collect(Collectors.toList());
     }
 
     private BoardResponseDto(Board entity) {
@@ -39,8 +43,11 @@ public class BoardResponseDto {
         this.createdAt = entity.getCreatedAt();
         this.modifiedAt = entity.getModifiedAt();
         this.likeCount = entity.getLikesList() != null ? entity.getLikesList().size() : 0;
-        this.category = entity.getCategory();  // 카테고리 설정
+        this.category = entity.getCategory();
         this.commentList = entity.getCommentList().stream().map(CommentResponseDto::from).collect(Collectors.toList());
+        this.attachments = entity.getAttachments().stream()
+                .map(AttachmentResponseDto::from)
+                .collect(Collectors.toList());
     }
 
     public static BoardResponseDto from(Board entity, List<CommentResponseDto> list) {

@@ -27,6 +27,11 @@ spring:
             scope:
               - email
               - profile
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 20MB
 
 jwt:
   issuer: 32204027@dankook.ac.kr
@@ -41,3 +46,15 @@ springdoc:
     display-request-duration: true
   show-actuator: true
   default-consumes-media-type: application/json
+
+cloud:
+  aws:
+    s3:
+      bucket: koreigner
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    stack:
+      auto: false
+    region:
+      static: ap-northeast-2
