@@ -29,6 +29,8 @@ jobs:
           GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}}
           GOOGLE_CLIENT_SECRET: ${{secrets.GOOGLE_CLIENT_SECRET}}
           JWT_SECRET_KEY: ${{secrets.JWT_SECRET_KEY}}
+          AWS_ACCESS_KEY: ${{secrets.AWS_ACCESS_KEY}}
+          AWS_SECRET_KEY: ${{secrets.AWS_SECRET_KEY}}
         run: ./gradlew clean build
 
       # Build with Docker
