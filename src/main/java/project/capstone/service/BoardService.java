@@ -100,10 +100,11 @@ public class BoardService {
                 if (!file.isEmpty()) {
                     try {
                         // MinIO에 파일 업로드
-                        String fileName = minioService.uploadFile(file);
+                        String fileName = file.getOriginalFilename();
+                        String filePath = minioService.uploadFile(file);
 
                         // 업로드된 파일 정보를 Attachment 엔티티로 저장
-                        Attachment attachment = new Attachment(savedBoard, fileName, fileName);
+                        Attachment attachment = new Attachment(savedBoard, fileName, filePath);
                         attachmentRepository.save(attachment);
                     } catch (Exception e) {
                         log.error("파일 업로드 실패", e);
@@ -188,10 +189,11 @@ public class BoardService {
                 if (!file.isEmpty()) {
                     try {
                         // MinIO에 파일 업로드
-                        String fileName = minioService.uploadFile(file);
+                        String fileName = file.getOriginalFilename();
+                        String filePath = minioService.uploadFile(file);
 
                         // 업로드된 파일 정보를 Attachment 엔티티로 저장
-                        Attachment attachment = new Attachment(board, fileName, fileName);
+                        Attachment attachment = new Attachment(board, fileName, filePath);
                         attachmentRepository.save(attachment);
                     } catch (Exception e) {
                         log.error("파일 업로드 실패", e);

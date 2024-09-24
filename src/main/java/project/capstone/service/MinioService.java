@@ -1,8 +1,10 @@
 package project.capstone.service;
 
+import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
+import io.minio.http.Method;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,7 +34,16 @@ public class MinioService {
                         .build()
         );
 
-        return fileName; // 업로드된 파일 이름 반환
+        // 업로드된 파일에 대한 URL 생성
+        String filePath = minioClient.getPresignedObjectUrl(
+                GetPresignedObjectUrlArgs.builder()
+                        .bucket(bucketName)
+                        .object(fileName)
+                        .method(Method.GET)
+                        .build()
+        );
+
+        return filePath;
     }
 
     public void removeFile(String fileName) throws Exception {
