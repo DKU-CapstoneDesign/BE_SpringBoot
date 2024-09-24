@@ -19,7 +19,7 @@ public class Attachment {
     @Column(nullable = false)
     private String fileName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String filePath;
 
     public Attachment(Board board, String fileName, String filePath) {
