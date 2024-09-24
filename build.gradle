@@ -56,6 +56,9 @@ dependencies {
 	testImplementation 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
+
+	// minio
+	implementation 'io.minio:minio:8.3.0'
 }
 
 test {

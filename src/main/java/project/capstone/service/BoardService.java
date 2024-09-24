@@ -13,21 +13,14 @@ import project.capstone.common.SuccessResponse;
 import project.capstone.dto.BoardRequestsDto;
 import project.capstone.dto.BoardResponseDto;
 import project.capstone.dto.CommentResponseDto;
-import project.capstone.entity.Board;
-import project.capstone.entity.Comment;
-import project.capstone.entity.User;
-import project.capstone.entity.Attachment;
+import project.capstone.entity.*;
 import project.capstone.entity.enumSet.ErrorType;
 import project.capstone.entity.enumSet.UserRoleEnum;
 import project.capstone.exception.RestApiException;
+import project.capstone.repository.AttachmentRepository;
 import project.capstone.repository.BoardRepository;
 import project.capstone.repository.UserRepository;
-import project.capstone.repository.AttachmentRepository;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -41,6 +34,7 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
     private final AttachmentRepository attachmentRepository;
+    private final MinioService minioService;
 
     // 게시글 전체 목록 조회
     @Transactional(readOnly = true)
@@ -102,30 +96,18 @@ public class BoardService {
 
         // 파일 처리
         if (attachments != null && !attachments.isEmpty()) {
-            String uploadDir = "/Users/heoyeonjae/Postman"; //  포스트맨 Working directory 주소 "/Users/{}/Postman"
-            try {
-                Files.createDirectories(Paths.get(uploadDir)); // 업로드 디렉토리 생성
-            } catch (IOException e) {
-                log.error("업로드 디렉토리 생성 실패", e);
-                throw new RuntimeException("업로드 디렉토리 생성 실패");
-            }
-
             for (MultipartFile file : attachments) {
                 if (!file.isEmpty()) {
-//                    log.info("첨부파일 이름: {}", file.getOriginalFilename()); // 파일 이름 로그 출력
-                    String originalFileName = file.getOriginalFilename();
-                    String filePath = uploadDir + "/" + originalFileName;
-
                     try {
-                        Path path = Paths.get(filePath);
-                        Files.write(path, file.getBytes());
+                        // MinIO에 파일 업로드
+                        String fileName = minioService.uploadFile(file);
 
-                        // Attachment 엔티티 생성 및 저장
-                        Attachment attachment = new Attachment(savedBoard, originalFileName, filePath);
+                        // 업로드된 파일 정보를 Attachment 엔티티로 저장
+                        Attachment attachment = new Attachment(savedBoard, fileName, fileName);
                         attachmentRepository.save(attachment);
-                    } catch (IOException e) {
-                        log.error("파일 저장 실패", e);
-                        throw new RuntimeException("파일 저장 실패");
+                    } catch (Exception e) {
+                        log.error("파일 업로드 실패", e);
+                        throw new RuntimeException("파일 업로드 실패: " + e.getMessage());
                     }
                 }
             }
@@ -187,37 +169,33 @@ public class BoardService {
             throw new RestApiException(ErrorType.NOT_WRITER);
         }
 
-        // 파일 처리
+        // 기존 파일 삭제 (필요에 따라 MinIO에서 파일 삭제 로직 추가 가능)
         List<Attachment> attachments = attachmentRepository.findByBoard(board);
         for (Attachment attachment : attachments) {
-            attachmentRepository.delete(attachment); // 기존 파일 삭제
+            try {
+                // MinIO에서 파일 삭제
+                minioService.removeFile(attachment.getFileName());
+                attachmentRepository.delete(attachment); // 데이터베이스에서 파일 삭제
+            } catch (Exception e) {
+                log.error("파일 삭제 실패", e);
+                // 파일 삭제 실패 시 예외 처리 로직 추가 가능
+            }
         }
 
-        if (requestsDto.getAttachments() != null) {
-            String uploadDir = "/Users/heoyeonjae/Postman"; // 수정된 절대 경로
-            try {
-                Files.createDirectories(Paths.get(uploadDir)); // 업로드 디렉토리 생성
-            } catch (IOException e) {
-                log.error("업로드 디렉토리 생성 실패", e);
-                throw new RuntimeException("업로드 디렉토리 생성 실패");
-            }
-
+        // 파일 처리
+        if (requestsDto.getAttachments() != null && !requestsDto.getAttachments().isEmpty()) {
             for (MultipartFile file : requestsDto.getAttachments()) {
                 if (!file.isEmpty()) {
-//                    log.info("첨부파일 이름: {}", file.getOriginalFilename()); // 파일 이름 로그 출력
-                    String originalFileName = file.getOriginalFilename();
-                    String filePath = uploadDir + "/" + originalFileName;
-
                     try {
-                        Path path = Paths.get(filePath);
-                        Files.write(path, file.getBytes());
+                        // MinIO에 파일 업로드
+                        String fileName = minioService.uploadFile(file);
 
-                        // Attachment 엔티티 생성 및 저장
-                        Attachment attachment = new Attachment(board, originalFileName, filePath);
+                        // 업로드된 파일 정보를 Attachment 엔티티로 저장
+                        Attachment attachment = new Attachment(board, fileName, fileName);
                         attachmentRepository.save(attachment);
-                    } catch (IOException e) {
-                        log.error("파일 저장 실패", e);
-                        throw new RuntimeException("파일 저장 실패");
+                    } catch (Exception e) {
+                        log.error("파일 업로드 실패", e);
+                        throw new RuntimeException("파일 업로드 실패: " + e.getMessage());
                     }
                 }
             }
@@ -249,12 +227,13 @@ public class BoardService {
         List<Attachment> attachments = attachmentRepository.findByBoard(board.get());
         for (Attachment attachment : attachments) {
             try {
-                Path path = Paths.get(attachment.getFilePath());
-                Files.deleteIfExists(path); // 파일 시스템에서 파일 삭제
-            } catch (IOException e) {
+                // MinIO에서 파일 삭제
+                minioService.removeFile(attachment.getFileName());
+                attachmentRepository.delete(attachment); // 데이터베이스에서 파일 삭제
+            } catch (Exception e) {
                 log.error("파일 삭제 실패", e);
+                // 파일 삭제 실패 시 예외 처리 로직 추가 가능
             }
-            attachmentRepository.delete(attachment); // 데이터베이스에서 파일 삭제
         }
 
         // 게시글 삭제
