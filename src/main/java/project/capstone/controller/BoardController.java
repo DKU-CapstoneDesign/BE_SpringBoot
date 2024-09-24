@@ -13,6 +13,7 @@ import project.capstone.entity.Board;
 import project.capstone.entity.User;
 import project.capstone.service.BoardService;
 import project.capstone.service.LikeService;
+import project.capstone.service.MinioService;
 import project.capstone.service.UserService;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class BoardController {
     private final BoardService boardService;
     private final UserService userService;
     private final LikeService likeService;
+    private final MinioService minioService;
 
     // 게시글 작성
     @PostMapping("/api/post")
