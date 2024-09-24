@@ -60,7 +60,7 @@ cloud:
       static: ap-northeast-2
 
 minio:
-  endpoint: http://localhost:9000
+  endpoint: http://object-api.tetraplace.com
   accessKey: ${MINIO_ACCESS_KEY}
   secretKey: ${MINIO_SECRET_KEY}
   bucketName: kore
