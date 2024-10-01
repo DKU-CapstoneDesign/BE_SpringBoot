@@ -45,6 +45,14 @@ public class CommentController {
         return commentService.deleteComment(id, user);
     }
 
+    // 댓글 조회
+    @GetMapping("/comment/{id}")
+    public ApiResponseDto<CommentResponseDto> getComment(@PathVariable("id") Long id) {
+        User user = getCurrentUser();
+        return commentService.getComment(id, user);
+    }
+
+
     // 현재 인증된 사용자 정보를 가져오는 메서드
     private User getCurrentUser() {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
