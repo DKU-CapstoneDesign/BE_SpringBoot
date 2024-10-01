@@ -58,19 +58,19 @@ public class BoardController {
     // 선택된 게시글 수정
     @PutMapping("/api/post/{id}")
     public ApiResponseDto<BoardResponseDto> updatePost(
-            @PathVariable Long id,
-            @RequestParam("userId") Long userId,
+            @PathVariable("id") Long id,
             @RequestParam("title") String title,
             @RequestParam("contents") String contents,
             @RequestParam(name = "category", required = false) Board.Category category,
             @RequestParam(name = "attachments", required = false) List<MultipartFile> attachments) {
 
         User user = getCurrentUser();  // 현재 사용자 가져오기
-        BoardRequestsDto requestsDto = new BoardRequestsDto(userId, title, contents, category, attachments);
+        BoardRequestsDto requestsDto = new BoardRequestsDto(user.getId(), title, contents, category, attachments);
 
         // BoardService의 updatePost 메서드 호출 (requestsDto를 전달)
         return boardService.updatePost(id, requestsDto, user);
     }
+
 
     // 선택된 게시글 삭제
     @DeleteMapping("/api/post/{id}")

@@ -89,4 +89,19 @@ public class CommentService {
 
         return ResponseUtils.ok(SuccessResponse.of(HttpStatus.OK, "댓글 삭제 성공"));
     }
+
+    // 댓글 조회
+    @Transactional
+    public ApiResponseDto<CommentResponseDto> getComment(Long id, User user) {
+        // 선택한 댓글이 DB에 있는지 확인
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new RestApiException(ErrorType.NOT_FOUND_WRITING));
+
+        // 권한에 따라 접근을 제한할 수 있다면 여기서 확인
+        if (!comment.getUser().equals(user) && user.getRole() == UserRoleEnum.USER) {
+            throw new RestApiException(ErrorType.NOT_AUTHORIZED);
+        }
+
+        return ResponseUtils.ok(CommentResponseDto.from(comment));
+    }
 }
