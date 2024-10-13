@@ -74,16 +74,3 @@ jobs:
             sudo docker rmi -f dipic/kore-be:latest
             sudo docker-compose up -d
           EOF
-
-      - name: Setup SSH key - [sub]
-        uses: webfactory/ssh-agent@v0.5.3
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY_SUB }}
-
-      - name: Deploy to OCI - [sub]
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST_SUB }} << 'EOF'
-            sudo docker rm -f kore-be
-            sudo docker rmi -f dipic/kore-be:latest
-            sudo docker-compose up -d
-          EOF
