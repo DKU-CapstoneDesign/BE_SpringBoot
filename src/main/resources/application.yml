@@ -1,3 +1,14 @@
+server:
+  port: 8080
+  ssl:
+    key-store: classpath:${KEY_STORE}
+    key-store-password: ${KEY_STORE_PASSWORD}
+    key-store-type: PKCS12
+    key-alias: ${KEY_ALIAS}
+    trust-store: classpath:${MINIO_TRUST_STORE}
+    trust-store-password: ${MINIO_TRUST_STORE_PASSWORD}
+    trust-store-type: JKS
+
 spring:
   jpa:
     hibernate:
@@ -17,25 +28,11 @@ spring:
     mongodb:
       uri: mongodb+srv://jkw:5033@kore.iv5scds.mongodb.net/chatdb?retryWrites=true&w=majority&appName=kore
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            scope:
-              - email
-              - profile
   servlet:
     multipart:
       enabled: true
       max-file-size: 10MB
       max-request-size: 20MB
-
-jwt:
-  issuer: 32204027@dankook.ac.kr
-  secret_key: ${JWT_SECRET_KEY}
 
 springdoc:
   swagger-ui:
@@ -47,20 +44,8 @@ springdoc:
   show-actuator: true
   default-consumes-media-type: application/json
 
-cloud:
-  aws:
-    s3:
-      bucket: koreigner
-    credentials:
-      access-key: ${AWS_ACCESS_KEY}
-      secret-key: ${AWS_SECRET_KEY}
-    stack:
-      auto: false
-    region:
-      static: ap-northeast-2
-
 minio:
-  endpoint: http://object-api.tetraplace.com
+  endpoint: https://object-api.tetraplace.com
   accessKey: ${MINIO_ACCESS_KEY}
   secretKey: ${MINIO_SECRET_KEY}
   bucketName: kore

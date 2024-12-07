@@ -1,4 +1,6 @@
 application.yml
+*.p12
+*.jks
 HELP.md
 .gradle
 .DS_Store

@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
         with:
@@ -26,11 +27,13 @@ jobs:
           DB_USERNAME: ${{secrets.DB_USERNAME}}
           DB_PASSWORD: ${{secrets.DB_PASSWORD}}
           DB_URL: ${{secrets.DB_URL}}
-          GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}}
-          GOOGLE_CLIENT_SECRET: ${{secrets.GOOGLE_CLIENT_SECRET}}
-          JWT_SECRET_KEY: ${{secrets.JWT_SECRET_KEY}}
           MINIO_ACCESS_KEY: ${{secrets.MINIO_ACCESS_KEY}}
           MINIO_SECRET_KEY: ${{secrets.MINIO_SECRET_KEY}}
+          MINIO_TRUST_STORE: ${{secrets.MINIO_TRUST_STORE}}
+          MINIO_TRUST_STORE_PASSWORD: ${{secrets.MINIO_TRUST_STORE_PASSWORD}}
+          KEY_STORE: ${{secrets.KEY_STORE}}
+          KEY_STORE_PASSWORD: ${{secrets.KEY_STORE_PASSWORD}}
+          KEY_ALIAS: ${{secrets.KEY_ALIAS}}
         run: ./gradlew clean build
 
       # Build with Docker

@@ -21,11 +21,9 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class BoardController {
-
     private final BoardService boardService;
     private final UserService userService;
     private final LikeService likeService;
-    private final MinioService minioService;
 
     // 게시글 작성
     @PostMapping("/api/post")
